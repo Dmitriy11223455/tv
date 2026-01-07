@@ -26,6 +26,6 @@ jobs:
         run: |
           git config --global user.name "Bot"
           git config --global user.email "bot@github.com"
-          git add playlist.m3u
+          git add playlist_928374hfkj.m3u
           git commit -m "Update tokens" || exit 0
           git push
