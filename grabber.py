@@ -35,7 +35,7 @@ async def get_tokens_and_make_playlist():
         print("Переход на сайт для входа...", flush=True)
         try:
             # Используем более универсальные селекторы и таймаут 60 сек
-            await page.goto("smotrettv.com", wait_until="domcontentloaded", timeout=60000)
+            await page.goto("https://smotrettv.com", wait_until="domcontentloaded", timeout=60000)
             
             # Проверяем, не появилась ли защита Cloudflare
             if "Just a moment" in await page.title():
