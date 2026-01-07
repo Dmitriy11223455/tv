@@ -4,7 +4,7 @@
     var config = {
         name: "Мой ТВ Плейлист",
         version: "2026.01.07",
-        https://raw.githubusercontent.com/Dmitriy11223455/tv/refs/heads/main/playlist_928374hfkj.m3u
+        
         // Обратите внимание на полный HTTPS адрес!
         content:
     };
