@@ -62,7 +62,7 @@ async def get_tokens_and_make_playlist():
             except Exception as e:
                 print(f"Ошибка на {name}: {e}")
 
-        with open("playlist.m3u", "w", encoding="utf-8") as f:
+        with open("playlist_928374hfkj.m3u", "w", encoding="utf-8") as f:
             f.write(playlist_data)
         
         await browser.close()
