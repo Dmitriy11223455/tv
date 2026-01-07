@@ -96,7 +96,7 @@ async def get_tokens_and_make_playlist():
             f.write(playlist_data)
         
         await browser.close()
-        print("\nОбновление завершено. Проверьте файл playlist.m3u")
+        print("\nОбновление завершено. Проверьте файл playlist_928374hfkj.m3u")
 
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
