@@ -1,17 +1,17 @@
 #EXTM3U
 #EXTINF:-1, Первый канал
-https://server.smotrettv.com/1003-pervyj-kanal.m3u8?token=1767789906_e5e5f6978d624c5d0bd90d954b188c647b63e5fe1395d41a1cee77f05941bcb3
+https://server.smotrettv.com/1003-pervyj-kanal.m3u8?token=1767790258_7d01c2d8c6ac07cb324b8d2ee6196b46c3eabbf64e201218de3781ed98f793ee
 #EXTINF:-1, Россия 1
-https://server.smotrettv.com/784-rossija-1.m3u8?token=1767789928_a154082b6be7648778526ffb1c568daa1e200df0b86e4375f65362e7bbf14a36
+https://server.smotrettv.com/784-rossija-1.m3u8?token=1767790281_d196695c17951d1805c6440d8819f67d412dccf548596ba2a1e1ed42a7705796
 #EXTINF:-1, Звезда
-https://server.smotrettv.com/310-zvezda.m3u8?token=1767789953_d51d4cf93599f8f3f7cab999371c396b7acad8495c33adae32da0066ea7bff6b
+https://server.smotrettv.com/310-zvezda.m3u8?token=1767790301_5f0a2fb4964568cb52955da81c32a424362f51584aaec7d079dc1c826e5bb916
 #EXTINF:-1, ТНТ
-https://server.smotrettv.com/329-tnt.m3u8?token=1767789973_e84bd75d73e8fbc9ea5601c2c77e19e4743572ce80832eb2398b81a4499e978f
+https://server.smotrettv.com/329-tnt.m3u8?token=1767790320_c40b4054405ed04b8403124ee394471f989d601c0799899e811fe6f1d2e4cdd8
 #EXTINF:-1, Россия 24
-https://server.smotrettv.com/217-rossija-24.m3u8?token=1767789991_0519621f0ffd615e4e0a57380f1fd5b1790762f0277adb22375ba4563e15786d
+https://server.smotrettv.com/217-rossija-24.m3u8?token=1767790341_d0be1f3972fb1f4cbe1ade4e89c746fba2df86870b3ab5ccf9f2c93706c70520
 #EXTINF:-1, СТС
-https://server.smotrettv.com/783-sts.m3u8?token=1767790013_f1706d45ee5a82e1b2509e3ec686a2aaa1b3e31261fc0ac292294b3c9b2fc23f
+https://server.smotrettv.com/783-sts.m3u8?token=1767790361_dc27164a0f75309255caadced5f3d1266b01229a77db4d38bd41f7a24df0aaa0
 #EXTINF:-1, НТВ
-https://server.smotrettv.com/6-ntv.m3u8?token=1767790033_621648dc87fb9654c92406012af03882edfaca93db123cc006eab2e3b141b925
+https://server.smotrettv.com/6-ntv.m3u8?token=1767790384_bacaf7da98f9c7d741bc8b5a8ef6405089803c4f16e286bbcc939f32387bd980
 #EXTINF:-1, Рен ТВ
-https://server.smotrettv.com/316-ren-tv.m3u8?token=1767790057_3499e54232c72ce330b5f3fe16c3f46637c78239e7664eac7160a586b245ddc3
+https://server.smotrettv.com/316-ren-tv.m3u8?token=1767790407_a34a246a9a1b1a00556cf7ba687feb6637f816dc6409205f5c46705ab1455ec7
