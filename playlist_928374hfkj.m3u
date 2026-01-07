@@ -1,1 +1,5 @@
 #EXTM3U
+#EXTINF:-1, ТНТ
+https://server.smotrettv.com/329-tnt.m3u8?token=1767789411_d623161bde8e57f3b5d2e0044c18f45d552554c3c4a1e9f7fdafce75819a7876
+#EXTINF:-1, Рен ТВ
+https://server.smotrettv.com/316-ren-tv.m3u8?token=1767789619_7ee2c5dd8dd083bbef9de8e722313aa469d1cf43a922c953f05d32e59383c420
