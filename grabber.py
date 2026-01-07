@@ -32,7 +32,7 @@ async def get_tokens_and_make_playlist():
 
         print("Переход на сайт для входа...", flush=True)
         try:
-            await page.goto("smotrettv.com", wait_until="domcontentloaded", timeout=60000)
+            await page.goto("https://smotrettv.com", wait_until="domcontentloaded", timeout=60000)
             await page.fill('input[name="email"]', login)
             await page.fill('input[name="password"]', password)
             await page.click('button[type="submit"]')
