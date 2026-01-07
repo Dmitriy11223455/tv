@@ -4,7 +4,6 @@ import re
 import random
 from playwright.async_api import async_playwright
 
-# 1. КОНФИГУРАЦИЯ КАНАЛОВ (Полные ссылки обязательны!)
 CHANNELS = {
     "Первый канал": "https://smotrettv.com/tv/public/1003-pervyj-kanal.html",
     "Россия 1": "https://smotrettv.com/tv/public/784-rossija-1.html",
@@ -13,17 +12,16 @@ CHANNELS = {
     "Россия 24": "https://smotrettv.com/tv/news/217-rossija-24.html",
     "СТС": "https://smotrettv.com/tv/entertainment/783-sts.html",
     "НТВ": "https://smotrettv.com/tv/public/6-ntv.html",
-    "Рен ТВ": "https://smotrettv.com/tv/public/316-ren-tv.html"}
+    "Рен ТВ": "https://smotrettv.com/tv/public/316-ren-tv.html"
 
-# Шаблон ссылки на поток
+}
+
 STREAM_BASE_URL = "https://server.smotrettv.com/{channel_id}.m3u8?token={token}"
-# User-Agent, который мы используем везде (для скрипта и для плеера)
 USER_AGENT_STRING = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 
 async def get_tokens_and_make_playlist():
     async with async_playwright() as p:
-        # Добавлены аргументы обхода детекции ботов
         browser = await p.chromium.launch(headless=True, args=["--disable-blink-features=AutomationControlled"])
         context = await browser.new_context(
             user_agent=USER_AGENT_STRING,
@@ -36,24 +34,35 @@ async def get_tokens_and_make_playlist():
 
         print("Переход на сайт для входа...", flush=True)
         try:
-            # Исправлена ссылка на вход
-            await page.goto("https://smotrettv.com", wait_until="domcontentloaded", timeout=60000)
+            # Используем более универсальные селекторы и таймаут 60 сек
+            await page.goto("smotrettv.com", wait_until="domcontentloaded", timeout=60000)
             
-            await page.fill('input[name="email"]', login)
-            await page.fill('input[name="password"]', password)
+            # Проверяем, не появилась ли защита Cloudflare
+            if "Just a moment" in await page.title():
+                print("Сайт под Cloudflare защитой. Скрипт не пройдет.", flush=True)
+                await browser.close()
+                return
+
+            # Селекторы, ищущие по типу поля, а не по имени
+            await page.wait_for_selector('input[type="email"]', timeout=30000)
+            await page.fill('input[type="email"]', login)
+            await page.fill('input[type="password"]', password)
+            
             await page.click('button[type="submit"]')
             await asyncio.sleep(10) 
             print("Авторизация выполнена.", flush=True)
         except Exception as e:
-            print(f"Ошибка авторизации: {e}", flush=True)
+            print(f"Критическая ошибка авторизации: {e}", flush=True)
+            await browser.close() # Прерываем выполнение, так как без входа токены не получить
+            return
 
         playlist_data = "#EXTM3U\n"
         
         for name, channel_url in CHANNELS.items():
+            # ... (остальной код для обработки каналов остается прежним) ...
             print(f"Обработка: {name}...", flush=True)
             current_token = None
 
-            # Функция перехвата токена
             def handle_request(request):
                 nonlocal current_token
                 if "token=" in request.url and "m3u8" in request.url:
@@ -66,21 +75,15 @@ async def get_tokens_and_make_playlist():
             try:
                 await page.goto(channel_url, wait_until="domcontentloaded", timeout=60000)
                 await page.mouse.move(random.randint(100, 500), random.randint(100, 500))
-                
-                wait_time = random.randint(15, 22)
-                await asyncio.sleep(wait_time) 
+                await asyncio.sleep(random.randint(15, 22)) 
 
                 if current_token:
                     channel_id = channel_url.split("/")[-1].replace(".html", "")
                     stream_url = STREAM_BASE_URL.format(channel_id=channel_id, token=current_token)
-                    
-                    # *** ДОБАВЛЕНИЕ ПАРАМЕТРОВ ДЛЯ DRM-PLAY/KODI ***
                     playlist_data += f'#EXTINF:-1, {name}\n'
                     playlist_data += f'#KODIPROP:inputstream.adaptive.license_type=widevine\n'
                     playlist_data += f'#EXTVLCOPT:http-user-agent={USER_AGENT_STRING}\n'
                     playlist_data += f'{stream_url}\n'
-                    # *************************************************
-
                     print(f"   [+] Успех: {name}", flush=True)
                 else:
                     print(f"   [-] Токен не найден. Пробую обновить страницу...", flush=True)
@@ -102,7 +105,6 @@ async def get_tokens_and_make_playlist():
             except Exception as e:
                 print(f"Ошибка на {name}: {e}", flush=True)
 
-        # Сохранение с вашим уникальным именем файла (убедитесь, что оно совпадает в .yml файле!)
         with open("playlist_928374hfkj.m3u", "w", encoding="utf-8") as f:
             f.write(playlist_data)
         
