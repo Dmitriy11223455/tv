@@ -32,7 +32,7 @@ async def get_tokens_and_make_playlist():
 
         print("Логинимся на smotrettv.com...")
         try:
-            await page.goto("smotrettv.com", wait_until="networkidle", timeout=60000)
+            await page.goto("https://smotrettv.com", wait_until="networkidle", timeout=60000)
             # Если на сайте есть модальное окно входа, заполняем поля
             await page.fill('input[name="email"]', login)
             await page.fill('input[name="password"]', password)
