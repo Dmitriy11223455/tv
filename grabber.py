@@ -4,6 +4,7 @@ import re
 import random
 from playwright.async_api import async_playwright
 
+# 1. КОНФИГУРАЦИЯ КАНАЛОВ (Ваши ссылки)
 CHANNELS = {
     "Первый канал": "https://smotrettv.com/tv/public/1003-pervyj-kanal.html",
     "Россия 1": "https://smotrettv.com/tv/public/784-rossija-1.html",
@@ -13,7 +14,6 @@ CHANNELS = {
     "СТС": "https://smotrettv.com/tv/entertainment/783-sts.html",
     "НТВ": "https://smotrettv.com/tv/public/6-ntv.html",
     "Рен ТВ": "https://smotrettv.com/tv/public/316-ren-tv.html"
-
 }
 
 STREAM_BASE_URL = "https://server.smotrettv.com/{channel_id}.m3u8?token={token}"
@@ -34,32 +34,39 @@ async def get_tokens_and_make_playlist():
 
         print("Переход на сайт для входа...", flush=True)
         try:
-            # Используем более универсальные селекторы и таймаут 60 сек
+            # Исправлено на валидный URL с https://
             await page.goto("https://smotrettv.com", wait_until="domcontentloaded", timeout=60000)
             
-            # Проверяем, не появилась ли защита Cloudflare
+            # Проверка на Cloudflare
             if "Just a moment" in await page.title():
                 print("Сайт под Cloudflare защитой. Скрипт не пройдет.", flush=True)
                 await browser.close()
                 return
 
+            print("Ищу кнопку входа...", flush=True)
+            login_button = await page.query_selector('a[href*="login"], .login-btn, text="Войти", text="Вход"')
+            
+            if login_button:
+                await login_button.click()
+                print("Кликнул 'Войти', жду форму...", flush=True)
+                await asyncio.sleep(3)
+
             # Селекторы, ищущие по типу поля, а не по имени
-            await page.wait_for_selector('input[type="email"]', timeout=30000)
-            await page.fill('input[type="email"]', login)
-            await page.fill('input[type="password"]', password)
+            await page.wait_for_selector('input[name="email"], input[type="email"], #email', timeout=30000)
+            await page.fill('input[name="email"], input[type="email"], #email', login)
+            await page.fill('input[name="password"], input[type="password"], #password', password)
             
             await page.click('button[type="submit"]')
             await asyncio.sleep(10) 
-            print("Авторизация выполнена.", flush=True)
+            print("Авторизация выполнена (или почти выполнена).", flush=True)
         except Exception as e:
             print(f"Критическая ошибка авторизации: {e}", flush=True)
-            await browser.close() # Прерываем выполнение, так как без входа токены не получить
+            await browser.close()
             return
 
         playlist_data = "#EXTM3U\n"
         
         for name, channel_url in CHANNELS.items():
-            # ... (остальной код для обработки каналов остается прежним) ...
             print(f"Обработка: {name}...", flush=True)
             current_token = None
 
@@ -80,10 +87,14 @@ async def get_tokens_and_make_playlist():
                 if current_token:
                     channel_id = channel_url.split("/")[-1].replace(".html", "")
                     stream_url = STREAM_BASE_URL.format(channel_id=channel_id, token=current_token)
+                    
+                    # *** ДОБАВЛЕНИЕ ПАРАМЕТРОВ ДЛЯ DRM-PLAY/KODI ***
                     playlist_data += f'#EXTINF:-1, {name}\n'
                     playlist_data += f'#KODIPROP:inputstream.adaptive.license_type=widevine\n'
                     playlist_data += f'#EXTVLCOPT:http-user-agent={USER_AGENT_STRING}\n'
                     playlist_data += f'{stream_url}\n'
+                    # *********************************************
+                    
                     print(f"   [+] Успех: {name}", flush=True)
                 else:
                     print(f"   [-] Токен не найден. Пробую обновить страницу...", flush=True)
