@@ -41,7 +41,7 @@ async def get_tokens_and_make_playlist():
         try:
             # Используем минимальный уровень ожидания 'domcontentloaded'
             # Если основной сайт лежит, пробуем зайти сразу на страницу логина
-            await page.goto("smotrettv.com", wait_until="domcontentloaded", timeout=90000)
+            await page.goto("https://smotrettv.com", wait_until="domcontentloaded", timeout=90000)
             await asyncio.sleep(5)
             
             # Ждем появления полей ввода вручную
