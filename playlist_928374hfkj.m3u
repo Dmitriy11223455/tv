@@ -1,17 +1,1 @@
 #EXTM3U
-#EXTINF:-1, Первый канал
-https://server.smotrettv.com/1003-pervyj-kanal.m3u8?token=1767812463_eb278a2b78ee0bda96be3039237a7be8512ea0a7817706a9a6792a57d2386365
-#EXTINF:-1, Россия 1
-https://server.smotrettv.com/784-rossija-1.m3u8?token=1767812485_949b8955968dab4cf389a2a175254a95330729f2e0bd2e92887184117bcd9f4b
-#EXTINF:-1, Звезда
-https://server.smotrettv.com/310-zvezda.m3u8?token=1767812504_99958bc844d247b1c446cd515ec3d7025cc2f5c89080d8a69bb2974a9d630b3c
-#EXTINF:-1, ТНТ
-https://server.smotrettv.com/329-tnt.m3u8?token=1767812528_4aa4612497800fd941dd7249df720edbc1badb97a6a291c9733211ae94f3308b
-#EXTINF:-1, Россия 24
-https://server.smotrettv.com/217-rossija-24.m3u8?token=1767812547_93915760dbc2e45e84e75a4dbc978c811b526e30031cd86a44207a2faa709b48
-#EXTINF:-1, СТС
-https://server.smotrettv.com/783-sts.m3u8?token=1767812571_64b23af5d0137d5fde789727823ea50cc7e32ad2af56bbf470fb6041f73cea7f
-#EXTINF:-1, НТВ
-https://server.smotrettv.com/6-ntv.m3u8?token=1767812591_ddaf80297c300124caba285e8673930ab5953e6f11d31d714cfa1a02308243b9
-#EXTINF:-1, Рен ТВ
-https://server.smotrettv.com/316-ren-tv.m3u8?token=1767812616_5c5178599ebd68c7c32d9142546a16db49dabd9846bbfc387c2c517e15fab805
