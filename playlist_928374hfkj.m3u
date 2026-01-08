@@ -1,17 +1,25 @@
 #EXTM3U
 #EXTINF:-1, Первый канал
-https://server.smotrettv.com/1003-pervyj-kanal.m3u8?token=10905.YRYtRrhcevv8DUkpwTXbv3LHHCHB1084o_dD6nqY1aMc-iL3Sy-i8SiQoZfYIDURDA1u3Ad3leNt81I1MZbKn_LVhZpxaWDuBBqnUdMJqmT5iW89K9jOwuz054M1EgJHi6OWWJhHDCMHjLnGrZY2ydHFSZxGdvQkrooXjzMasTQkdGWJXUFHU9lW681xpmKcczhtFmyLK7Z1rN-k_oaMCjuSUTh2wqEk051dWelFL4s%2C.Qngq7iJkDpKQfklczJeWmGuw9s0%2C
+#EXTVLCOPT:http-referrer=https://smotrettv.com/
+https://server.smotrettv.com/1003-pervyj-kanal.m3u8?token=1767870850_ee1c033b0a9d355ee184d0e6c36f873a3c6b0b48e6077b7ae9a7204e3f40d9d5|Referer=https://smotrettv.com/
 #EXTINF:-1, Россия 1
-https://server.smotrettv.com/784-rossija-1.m3u8?token=1767864274_11c9269732610be5a0d97805f8e13b14b122e2609c23508613937382cefe0373
+#EXTVLCOPT:http-referrer=https://smotrettv.com/
+https://server.smotrettv.com/784-rossija-1.m3u8?token=1767870867_d7b725751cb63c1755fe2c8062db9409b9f04680903c77b778d415f3af9df44b|Referer=https://smotrettv.com/
 #EXTINF:-1, Звезда
-https://server.smotrettv.com/310-zvezda.m3u8?token=1767864295_93ee5cb0ea04e63a9a7f6b0689b370335205e6855766b8feece845e0010306da
+#EXTVLCOPT:http-referrer=https://smotrettv.com/
+https://server.smotrettv.com/310-zvezda.m3u8?token=1767870888_a725df8d6533a8c1a1632524206b782fbd07844ae2417cadc797e0397a433b2a|Referer=https://smotrettv.com/
 #EXTINF:-1, ТНТ
-https://server.smotrettv.com/329-tnt.m3u8?token=1767864316_f22fc9aa4243b7e184889d5f69cc541e3d9cbf94fbd54565e6cf3ace9f1d4acc
+#EXTVLCOPT:http-referrer=https://smotrettv.com/
+https://server.smotrettv.com/329-tnt.m3u8?token=1767870906_ea36cb2283ce5dbb5f68e11735383e144dfacf5cc782d0a46cf67557c240a55d|Referer=https://smotrettv.com/
 #EXTINF:-1, Россия 24
-https://server.smotrettv.com/217-rossija-24.m3u8?token=yabs.NzIwNTc2MTE1NDExMTc3ODQ%3D
+#EXTVLCOPT:http-referrer=https://smotrettv.com/
+https://server.smotrettv.com/217-rossija-24.m3u8?token=1767870929_6a999579701887feae065a023de9fa0cf6c64181fc10a540d54892d45fbf8141|Referer=https://smotrettv.com/
 #EXTINF:-1, СТС
-https://server.smotrettv.com/783-sts.m3u8?token=f8d36885cb027b3d6cb6565d3143dc18518a2d46%3A1767864253
+#EXTVLCOPT:http-referrer=https://smotrettv.com/
+https://server.smotrettv.com/783-sts.m3u8?token=1767870949_b86f58a464388b19f5e911efd5dadb99978a22b08275e911bafa3e4ad0c5e4c5|Referer=https://smotrettv.com/
 #EXTINF:-1, НТВ
-https://server.smotrettv.com/6-ntv.m3u8?token=1767864385_9a40caf7166620976648567796a6eb7e423c6d27b43fd31d12553afa15b9ab69
+#EXTVLCOPT:http-referrer=https://smotrettv.com/
+https://server.smotrettv.com/6-ntv.m3u8?token=1767870972_3c71c8de9163f578328e2c93ae3a5f0d805849f30dea2ea646aa3976b71ec784|Referer=https://smotrettv.com/
 #EXTINF:-1, Рен ТВ
-https://server.smotrettv.com/316-ren-tv.m3u8?token=1767864406_7f5d30507d21fbaa908e722335a3e0441c11a0dea20e814532c43785dd75df8f
+#EXTVLCOPT:http-referrer=https://smotrettv.com/
+https://server.smotrettv.com/316-ren-tv.m3u8?token=1767870993_3d9ed0992df92448243814fece8a85280afa1a50b3f162d4e6cd2ca9a4cc4bf2|Referer=https://smotrettv.com/
