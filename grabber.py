@@ -20,32 +20,51 @@ STREAM_BASE_URL = "https://server.smotrettv.com/{channel_id}.m3u8?token={token}|
 
 async def get_tokens_and_make_playlist():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True, args=["--disable-blink-features=AutomationControlled"])
-        context = await browser.new_context(user_agent=USER_AGENT, viewport={'width': 1280, 'height': 720})
+        # В 2026 году важно использовать дополнительные аргументы для скрытия автоматизации
+        browser = await p.chromium.launch(headless=True, args=[
+            "--disable-blink-features=AutomationControlled",
+            "--no-sandbox",
+            "--disable-setuid-sandbox"
+        ])
+        
+        context = await browser.new_context(
+            user_agent=USER_AGENT,
+            viewport={'width': 1280, 'height': 720},
+            ignore_https_errors=True
+        )
         page = await context.new_page()
 
         login = os.getenv('LOGIN')
         password = os.getenv('PASSWORD')
 
-        print("Авторизация...", flush=True)
+        print(">>> Попытка авторизации...", flush=True)
         try:
-            await page.goto("https://smotrettv.com/", wait_until="commit", timeout=60000)
+            # Используем минимальный уровень ожидания 'domcontentloaded'
+            # Если основной сайт лежит, пробуем зайти сразу на страницу логина
+            await page.goto("smotrettv.com", wait_until="domcontentloaded", timeout=90000)
+            await asyncio.sleep(5)
+            
+            # Ждем появления полей ввода вручную
+            await page.wait_for_selector('input[name="email"]', timeout=20000)
             await page.fill('input[name="email"]', login)
             await page.fill('input[name="password"]', password)
             await page.click('button[type="submit"]')
-            await asyncio.sleep(10) 
+            
+            # Ждем успешного входа
+            await asyncio.sleep(12) 
+            print(">>> Авторизация выполнена успешно.", flush=True)
         except Exception as e:
-            print(f"Ошибка входа: {e}", flush=True)
+            print(f">>> Критическая ошибка при входе: {e}", flush=True)
+            # Не выходим, пробуем парсить каналы (вдруг куки сохранились)
 
         playlist_data = "#EXTM3U\n"
         
         for name, channel_url in CHANNELS.items():
-            print(f"Обработка: {name}...", flush=True)
+            print(f"[*] Канал: {name}...", flush=True)
             current_token = None
 
-            async def handle_request(request):
+            def handle_request(request):
                 nonlocal current_token
-                # Ищем токен в любом запросе к серверу вещания
                 if "server.smotrettv.com" in request.url and "token=" in request.url:
                     match = re.search(r'token=([^&|\s]+)', request.url)
                     if match:
@@ -54,42 +73,49 @@ async def get_tokens_and_make_playlist():
             page.on("request", handle_request)
             
             try:
-                await page.goto(channel_url, wait_until="domcontentloaded", timeout=60000)
-                await asyncio.sleep(5)
+                # Переходим на канал, не дожидаясь полной загрузки ('commit')
+                await page.goto(channel_url, wait_until="commit", timeout=60000)
+                await asyncio.sleep(8)
 
-                # Попытка кликнуть по плееру, чтобы вызвать запрос токена
-                try:
-                    # Убираем возможные баннеры/оверлеи
-                    await page.evaluate('() => document.querySelectorAll(".ads, .overlay").forEach(el => el.remove())')
-                    # Кликаем в центр области плеера
-                    await page.mouse.click(640, 360) 
-                    print(f"   [*] Клик по плееру выполнен", flush=True)
-                except:
-                    pass
-
-                # Ждем токен (увеличено время)
-                for _ in range(30):
-                    if current_token: break
+                # Эмуляция клика в центр плеера (в 2026 году это часто вызывает поток)
+                await page.mouse.click(640, 360)
+                
+                # Цикл ожидания токена (макс 25 сек)
+                for _ in range(25):
+                    if current_token:
+                        break
                     await asyncio.sleep(1)
 
                 if current_token:
                     channel_id = channel_url.split("/")[-1].replace(".html", "")
                     stream_url = STREAM_BASE_URL.format(channel_id=channel_id, token=current_token, ua=USER_AGENT)
                     playlist_data += f'#EXTINF:-1, {name}\n#EXTVLCOPT:http-referrer=https://smotrettv.com/\n{stream_url}\n'
-                    print(f"   [+] Токен получен: {current_token[:15]}...", flush=True)
+                    print(f"   [+] Токен: {current_token[:15]}...", flush=True)
                 else:
-                    print(f"   [!] Токен НЕ найден", flush=True)
+                    # Попытка №2: Обновление страницы
+                    print(f"   [-] Перезагрузка страницы...", flush=True)
+                    await page.reload(wait_until="commit")
+                    await asyncio.sleep(15)
+                    if current_token:
+                        channel_id = channel_url.split("/")[-1].replace(".html", "")
+                        stream_url = STREAM_BASE_URL.format(channel_id=channel_id, token=current_token, ua=USER_AGENT)
+                        playlist_data += f'#EXTINF:-1, {name}\n{stream_url}\n'
+                        print(f"   [+] Токен получен после релоада!", flush=True)
+                    else:
+                        print(f"   [!] Токен НЕ найден.", flush=True)
 
-                await asyncio.sleep(random.randint(3, 5))
+                await asyncio.sleep(random.randint(2, 4))
 
             except Exception as e:
-                print(f"Ошибка: {e}", flush=True)
+                print(f"   [!] Ошибка на {name}: {e}", flush=True)
 
+        # Сохранение плейлиста
         with open("playlist_928374hfkj.m3u", "w", encoding="utf-8") as f:
             f.write(playlist_data)
         
         await browser.close()
-        print("\nГотово!", flush=True)
+        print("\n>>> Скрипт завершен.", flush=True)
 
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
+
