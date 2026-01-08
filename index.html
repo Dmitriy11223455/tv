@@ -1,12 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>MSX Плейлист</title>
-    <!-- Подключаем ваш скрипт -->
-    <script src="index.js"></script>
+    <title>SmotretTV Web Player 2026</title>
+    <!-- Подключаем HLS.js для работы с потоками -->
+    <script src="cdn.jsdelivr.net"></script>
+    <style>
+        body { background: #111; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
+        #video { width: 800px; max-width: 95%; background: #000; border-radius: 8px; }
+        .channels { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; width: 800px; }
+        button { padding: 10px; background: #333; color: white; border: 1px solid #444; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #555; }
+    </style>
 </head>
 <body>
-    <div id="msx-root">Загрузка плейлиста...</div>
+
+    <h2>IPTV Player (GitHub Edition)</h2>
+    <video id="video" controls></video>
+
+    <div class="channels" id="channelList">
+        <!-- Список каналов будет здесь -->
+    </div>
+
+<script>
+    const video = document.getElementById('video');
+    const playlistUrl = "https://raw.githubusercontent.com/Dmitriy11223455/tv/refs/heads/main/playlist_928374hfkj.m3u";
+
+    // Инициализация hls.js с настройками кастомных заголовков
+    let hls = new Hls({
+        xhrSetup: function (xhr, url) {
+            // ВАЖНО: В браузере напрямую Referer менять нельзя из-за безопасности.
+            // Но многие серверы в 2026 принимают заголовок X-Requested-With или Origin
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        }
+    });
+
+    async function loadPlaylist() {
+        const response = await fetch(playlistUrl);
+        const text = await response.text();
+        const lines = text.split('\n');
+        const channels = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].startsWith('#EXTINF')) {
+                const name = lines[i].split(',')[1];
+                const url = lines[i + 1].trim();
+                channels.push({ name, url });
+            }
+        }
+
+        renderChannels(channels);
+    }
+
+    function renderChannels(channels) {
+        const container = document.getElementById('channelList');
+        channels.forEach(ch => {
+            const btn = document.createElement('button');
+            btn.innerText = ch.name;
+            btn.onclick = () => playStream(ch.url);
+            container.appendChild(btn);
+        });
+    }
+
+    function playStream(url) {
+        // Очистка URL от метаданных DRM-Play (|Referer=...), если они есть
+        const cleanUrl = url.split('|')[0];
+
+        if (Hls.isSupported()) {
+            hls.loadSource(cleanUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Для Safari
+            video.src = cleanUrl;
+            video.play();
+        }
+    }
+
+    loadPlaylist();
+</script>
 </body>
 </html>
