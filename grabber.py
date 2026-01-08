@@ -29,7 +29,7 @@ async def get_tokens_and_make_playlist():
 
         print("Авторизация...", flush=True)
         try:
-            await page.goto("https://smotrettv.com/", wait_until="networkidle", timeout=60000)
+            await page.goto("https://smotrettv.com/", wait_until="commit", timeout=60000)
             await page.fill('input[name="email"]', login)
             await page.fill('input[name="password"]', password)
             await page.click('button[type="submit"]')
