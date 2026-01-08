@@ -16,8 +16,7 @@ CHANNELS = {
 }
 
 # Базовый URL теперь включает конструкцию для проброса заголовка Referer
-STREAM_BASE_URL = "https://server.smotrettv.com/{channel_id}.m3u8?token={token}|Referer=https://smotrettv.com|User-Agent={UA}""
-
+STREAM_BASE_URL = f"https://server.smotrettv.com/{{channel_id}}.m3u8?token={{token}}|Referer=https://smotrettv.com|User-Agent={USER_AGENT}"
 async def get_tokens_and_make_playlist():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, args=["--disable-blink-features=AutomationControlled"])
