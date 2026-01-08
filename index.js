@@ -5,7 +5,7 @@
         name: "Мой ТВ Плейлист",
         version: "2026.01.07",
         
-        // Обратите внимание на полный HTTPS адрес!
+        https://raw.githubusercontent.com/Dmitriy11223455/tv/refs/heads/main/playlist_928374hfkj.m3u
         content:
     };
 
