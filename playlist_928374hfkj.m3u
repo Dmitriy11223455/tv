@@ -1,17 +1,17 @@
 #EXTM3U
 #EXTINF:-1, Первый канал
-https://server.smotrettv.com/1003-pervyj-kanal.m3u8?token=1768675991_14f6969b1cbba48c75ad5febd541002062f9239ba9244a018cd9013659ea470a|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://server.smotrettv.com/1003-pervyj-kanal.m3u8?token=1768708985_3a834d12177818fbbd6e4b4ee8b127abb6d675fc6b0757e45eb0c243b40df4a3|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
 #EXTINF:-1, Россия 1
-https://server.smotrettv.com/784-rossija-1.m3u8?token=6187322aaebae05a6db06e8a62621a231286605b%3A1768675964|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://server.smotrettv.com/784-rossija-1.m3u8?token=3f85d624b2df1b0b4331c62347c0ce94fe3b2301%3A1768708958|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
 #EXTINF:-1, Звезда
-https://server.smotrettv.com/310-zvezda.m3u8?token=1768676015_d99543db7ce41863b43d0a95371ec46523baf9e2610df88480df096d4af56861|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://server.smotrettv.com/310-zvezda.m3u8?token=1768709013_846d4dc5df860625bcc8a83a279b802f3c51205e493c99440589d2399acb07c1|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
 #EXTINF:-1, ТНТ
-https://server.smotrettv.com/329-tnt.m3u8?token=1768676029_36be30ed2c7340c0b58766d35bec5c16d3d74eafceffc7ef63e4e54ad112b796|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://server.smotrettv.com/329-tnt.m3u8?token=1768709027_e7a002f629682120a5e38999d4b6837b7d5e4906d3ef177816253c0adf8d606e|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
 #EXTINF:-1, Россия 24
-https://server.smotrettv.com/217-rossija-24.m3u8?token=6187322aaebae05a6db06e8a62621a231286605b%3A1768675964|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://server.smotrettv.com/217-rossija-24.m3u8?token=yabs.NzIwNTc2MTE1NDExNzYwODc%3D|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
 #EXTINF:-1, СТС
-https://server.smotrettv.com/783-sts.m3u8?token=yabs.NzIwNTc2MTE1NTE0NTg4NTYKNzIwNTc2MTE1NDExNzYwODg%3D|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://server.smotrettv.com/783-sts.m3u8?token=3f85d624b2df1b0b4331c62347c0ce94fe3b2301%3A1768708958|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
 #EXTINF:-1, НТВ
-https://server.smotrettv.com/6-ntv.m3u8?token=1768676070_8d360a3fbee0d9a6afc9f52f8922cd593763b8f72b49642bcf79243431aec195|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://server.smotrettv.com/6-ntv.m3u8?token=1768709065_da7b64c0f3df9d52808ee9bc33d5df1c5c025f11350f3302d98df2f5a13a9d34|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
 #EXTINF:-1, Рен ТВ
-https://server.smotrettv.com/316-ren-tv.m3u8?token=1768676084_29a8b9cf55827de52f441ed47d0f05f69c47ace119d1ccad2e3ffc0ad52f5b84|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://server.smotrettv.com/316-ren-tv.m3u8?token=1768709078_a2e93296ad958cfaf9eb152828fa2b604dff6c0c91b1035aa8253075ffdd6651|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
