@@ -1,1 +1,17 @@
 #EXTM3U
+#EXTINF:-1, Первый канал
+https://server.smotrettv.com/1003-pervyj-kanal.m3u8?token=1769541491_acd37961d23546c463b08b2689263ee9d105c210e386dc37f93ca5aebdc2cd36|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+#EXTINF:-1, Россия 1
+https://server.smotrettv.com/784-rossija-1.m3u8?token=89235201aaa65cfa15c65a38340e1bd2d8159356%3A1769541464|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+#EXTINF:-1, Звезда
+https://server.smotrettv.com/310-zvezda.m3u8?token=1769541519_d09988df957e63ad769dc0fc0e0c93aa16097a257a94f232204682f80a68bf9d|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+#EXTINF:-1, ТНТ
+https://server.smotrettv.com/329-tnt.m3u8?token=1769541532_724c71a3dd99485d7897b55aa5a18ea62b3b1072d8efbded6552a2c60fef958a|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+#EXTINF:-1, Россия 24
+https://server.smotrettv.com/217-rossija-24.m3u8?token=89235201aaa65cfa15c65a38340e1bd2d8159356%3A1769541464|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+#EXTINF:-1, СТС
+https://server.smotrettv.com/783-sts.m3u8?token=89235201aaa65cfa15c65a38340e1bd2d8159356%3A1769541464|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+#EXTINF:-1, НТВ
+https://server.smotrettv.com/6-ntv.m3u8?token=1769541571_56321bfddc54601b41d5d1275826e39ff46475beaaf36f28fd00720fbe987ffc|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+#EXTINF:-1, Рен ТВ
+https://server.smotrettv.com/316-ren-tv.m3u8?token=1769541584_7b9b3b11271b7cedb9953cdc5669f15a67ae4a2204b9ad2d48ad006749eea56c|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
