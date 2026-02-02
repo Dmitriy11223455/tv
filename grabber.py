@@ -1,7 +1,6 @@
 import asyncio
 import random
 from playwright.async_api import async_playwright
-from playwright_stealth import stealth_async
 
 CHANNELS = {
     "Первый канал": "https://smotrettv.com/tv/public/1003-pervyj-kanal.html",
