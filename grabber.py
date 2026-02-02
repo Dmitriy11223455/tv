@@ -3,14 +3,14 @@ import random
 from playwright.async_api import async_playwright
 
 CHANNELS = {
-    "Первый канал": "https://smotrettv.comtv/public/1003-pervyj-kanal.html",
-    "Россия 1": "https://smotrettv.comtv/public/784-rossija-1.html",
-    "Звезда": "https://smotrettv.comtv/public/310-zvezda.html",
-    "ТНТ": "https://smotrettv.comtv/entertainment/329-tnt.html",
-    "Россия 24": "https://smotrettv.comtv/news/217-rossija-24.html",
-    "СТС": "https://smotrettv.comtv/entertainment/783-sts.html",
-    "НТВ": "https://smotrettv.comtv/public/6-ntv.html",
-    "Рен ТВ": "https://smotrettv.comtv/public/316-ren-tv.html"
+    "Первый канал": "https://smotrettv.com/public/1003-pervyj-kanal.html",
+    "Россия 1": "https://smotrettv.com/public/784-rossija-1.html",
+    "Звезда": "https://smotrettv.com/public/310-zvezda.html",
+    "ТНТ": "https://smotrettv.com/entertainment/329-tnt.html",
+    "Россия 24": "https://smotrettv.com/news/217-rossija-24.html",
+    "СТС": "https://smotrettv.com/entertainment/783-sts.html",
+    "НТВ": "https://smotrettv.com/public/6-ntv.html",
+    "Рен ТВ": "https://smotrettv.com/public/316-ren-tv.html"
 }
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
