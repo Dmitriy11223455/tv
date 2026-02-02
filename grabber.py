@@ -13,15 +13,19 @@ CHANNELS = {
     "Рен ТВ": "https://smotrettv.com/tv/public/316-ren-tv.html"
 }
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 
 async def get_tokens_and_make_playlist():
     playlist_streams = [] 
 
     async with async_playwright() as p:
         print(">>> Запуск браузера...")
-        # Если не ловит в headless=True, поменяй на False, чтобы видеть процесс
-        browser = await p.chromium.launch(headless=True)
+        # Аргументы для обхода детекции автоматизации без лишних библиотек
+        browser = await p.chromium.launch(headless=True, args=[
+            "--disable-blink-features=AutomationControlled",
+            "--no-sandbox",
+            "--disable-setuid-sandbox"
+        ])
         
         context = await browser.new_context(
             user_agent=USER_AGENT,
@@ -29,57 +33,55 @@ async def get_tokens_and_make_playlist():
         )
         
         page = await context.new_page()
-        # Скрываем следы автоматизации
-        await stealth_async(page)
 
         for name, channel_url in CHANNELS.items():
-            print(f"[*] Граббинг: {name}...")
+            print(f"[*] Обработка: {name}...")
             current_stream_url = None
 
-            # Ловим запросы на уровне КОНТЕКСТА (видит всё внутри фреймов)
+            # Ловим запросы на уровне контекста (важно для iFrame)
             async def handle_request(request):
                 nonlocal current_stream_url
                 url = request.url
-                # Ищем заветный m3u8 с токеном
                 if ".m3u8" in url and "token=" in url:
                     current_stream_url = url
-                    print(f"   [OK] Ссылка поймана!")
 
             context.on("request", handle_request)
             
             try:
-                # Заходим на страницу
-                await page.goto(channel_url, wait_until="networkidle", timeout=60000)
+                # Переходим на страницу и ждем минимальной загрузки
+                await page.goto(channel_url, wait_until="domcontentloaded", timeout=60000)
                 
-                # Ждем чуть-чуть и имитируем активность
-                await asyncio.sleep(3)
-                # Кликаем примерно в центр плеера, чтобы инициировать поток
-                await page.mouse.click(640, 480)
+                # Ждем прогрузки скриптов плеера
+                await asyncio.sleep(8)
                 
-                # Ждем появления ссылки 15 сек
-                for _ in range(15):
+                # Имитируем клик в центр плеера для запуска трансляции
+                await page.mouse.click(640, 360)
+                
+                # Ждем поимки ссылки до 12 секунд
+                for _ in range(12):
                     if current_stream_url: break
                     await asyncio.sleep(1)
 
                 if current_stream_url:
                     playlist_streams.append((name, current_stream_url))
+                    print(f"   [OK] Ссылка получена")
                 else:
-                    print(f"   [!] Не удалось вытащить ссылку для {name}")
+                    print(f"   [!] Ссылка не найдена")
 
             except Exception as e:
                 print(f"   [!] Ошибка на {name}: {e}")
 
-            # Убираем слушателя перед следующим каналом
             context.remove_listener("request", handle_request)
+            # Небольшая пауза между каналами, чтобы не забанили
             await asyncio.sleep(random.uniform(2, 4))
 
-        # Сохранение плейлиста
+        # Запись в файл
         if playlist_streams:
             with open("playlist.m3u", "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n")
                 for name, link in playlist_streams: 
                     f.write(f'#EXTINF:-1, {name}\n{link}\n')
-            print(f"\n>>> Готово! Собрано {len(playlist_streams)} каналов в playlist.m3u")
+            print(f"\n>>> Готово! Собрано каналов: {len(playlist_streams)}")
         
         await browser.close()
 
