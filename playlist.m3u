@@ -1,17 +1,3 @@
 #EXTM3U
-#EXTINF:-1, Первый канал
-https://server.smotrettv.com/1003-pervyj-kanal.m3u8?token=1770036798_fdc4241569dce666115996e0cfc881f0c9cf4682a0a4c0f88e173893665a8bb6|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
 #EXTINF:-1, Россия 1
-https://server.smotrettv.com/784-rossija-1.m3u8?token=f1a63bcd6a926f5e6e9f9d55c627a460f47667b2%3A1770036770|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
-#EXTINF:-1, Звезда
-https://server.smotrettv.com/310-zvezda.m3u8?token=1770036824_0164fb1fd3d3043a03858f4543cb144a2fef2fc198f744d4604f05cbf0fb44c6|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
-#EXTINF:-1, ТНТ
-https://server.smotrettv.com/329-tnt.m3u8?token=1770036836_2c595c740e187ed84d0c7d3134e353d0225b88cfc2faee84e77a4a49041e19c5|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
-#EXTINF:-1, Россия 24
-https://server.smotrettv.com/217-rossija-24.m3u8?token=f1a63bcd6a926f5e6e9f9d55c627a460f47667b2%3A1770036770|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
-#EXTINF:-1, СТС
-https://server.smotrettv.com/783-sts.m3u8?token=f1a63bcd6a926f5e6e9f9d55c627a460f47667b2%3A1770036770|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
-#EXTINF:-1, НТВ
-https://server.smotrettv.com/6-ntv.m3u8?token=1770036881_91b89a8a2e1dd9d4029fe591123375b064688b2719bf47e9d6a4602c91cbe604|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
-#EXTINF:-1, Рен ТВ
-https://server.smotrettv.com/316-ren-tv.m3u8?token=1770036896_79a188a7a310a1e72d95c778b1f095114925a6788b80605ef605875dea88722a|Referer=smotrettv.comMozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://edge01r.mediavitrina.ru/hls-livef1/russia1/tracks-v4a1/mono.m3u8?token=v2.hZFfuLhuFiNNWYIxSpqyYLCkYBWD2Ncne4aKWTHpYvE.2XpYmMVMy7-7SWZ4BWbY3KZkdArywOsALKh_ejWjunc.1770662938.b7bc2799f7e5cd1838c978def051863a
