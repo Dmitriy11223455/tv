@@ -1,9 +1,7 @@
 import asyncio
-import os
-import re
 import random
-import json
 from playwright.async_api import async_playwright
+from playwright_stealth import stealth_async
 
 CHANNELS = {
     "Первый канал": "https://smotrettv.com/tv/public/1003-pervyj-kanal.html",
@@ -16,86 +14,75 @@ CHANNELS = {
     "Рен ТВ": "https://smotrettv.com/tv/public/316-ren-tv.html"
 }
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
 
 async def get_tokens_and_make_playlist():
-    # Список будет хранить кортежи: (название_канала, полный_URL_потока)
     playlist_streams = [] 
 
     async with async_playwright() as p:
-        print(">>> Запуск браузера с имитацией пользователя...", flush=True)
-        
-        # Настройки для обхода детекции ботов и headless режима
-        browser = await p.chromium.launch(headless=True, args=[
-            "--disable-blink-features=AutomationControlled",
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-infobars"
-        ])
+        print(">>> Запуск браузера...")
+        # Если не ловит в headless=True, поменяй на False, чтобы видеть процесс
+        browser = await p.chromium.launch(headless=True)
         
         context = await browser.new_context(
             user_agent=USER_AGENT,
-            viewport={'width': 1920, 'height': 1080},
-            locale="ru-RU",
-            timezone_id="Europe/Moscow"
+            viewport={'width': 1280, 'height': 720}
         )
         
         page = await context.new_page()
-        await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        # Скрываем следы автоматизации
+        await stealth_async(page)
 
-        # ... (Код авторизации, если нужен, можно вставить здесь, используя os.getenv('LOGIN')/os.getenv('PASSWORD')) ...
-
-        print(">>> Переход по каналам...", flush=True)
-        
         for name, channel_url in CHANNELS.items():
-            print(f"[*] Граббинг: {name}...", flush=True)
+            print(f"[*] Граббинг: {name}...")
             current_stream_url = None
 
-            # Обработчик запросов, который ловит полный URL с токеном
-            def handle_request(request):
+            # Ловим запросы на уровне КОНТЕКСТА (видит всё внутри фреймов)
+            async def handle_request(request):
                 nonlocal current_stream_url
                 url = request.url
+                # Ищем заветный m3u8 с токеном
                 if ".m3u8" in url and "token=" in url:
                     current_stream_url = url
-                    print(f"   [REQ] Пойман URL: {url}", flush=True)
+                    print(f"   [OK] Ссылка поймана!")
 
-
-            page.on("request", handle_request)
+            context.on("request", handle_request)
             
             try:
-                await page.goto(channel_url, wait_until="domcontentloaded", timeout=600000)
-                await asyncio.sleep(random.uniform(5, 8))
-
-                # Клик по плееру (имитация запуска)
-                await page.mouse.click(640, 360)
+                # Заходим на страницу
+                await page.goto(channel_url, wait_until="networkidle", timeout=60000)
                 
-                # Ждем 20 секунд, пока URL не будет пойман
-                for _ in range(20):
+                # Ждем чуть-чуть и имитируем активность
+                await asyncio.sleep(3)
+                # Кликаем примерно в центр плеера, чтобы инициировать поток
+                await page.mouse.click(640, 480)
+                
+                # Ждем появления ссылки 15 сек
+                for _ in range(15):
                     if current_stream_url: break
                     await asyncio.sleep(1)
 
                 if current_stream_url:
-                    # Добавляем в список кортеж (Название, Полный_URL)
                     playlist_streams.append((name, current_stream_url))
-                    print(f"   [+] URL для {name} успешно добавлен в список.", flush=True)
                 else:
-                    print(f"   [!] URL с токеном для {name} не пойман.", flush=True)
-
-                await asyncio.sleep(random.uniform(2, 5))
-                page.remove_listener("request", handle_request)
+                    print(f"   [!] Не удалось вытащить ссылку для {name}")
 
             except Exception as e:
-                print(f"   [!] Ошибка на {name}: {e}", flush=True)
+                print(f"   [!] Ошибка на {name}: {e}")
+
+            # Убираем слушателя перед следующим каналом
+            context.remove_listener("request", handle_request)
+            await asyncio.sleep(random.uniform(2, 4))
 
         # Сохранение плейлиста
-        with open("playlist.m3u", "w", encoding="utf-8") as f:
-            f.write("#EXTM3U\n")
-            for name, link in set(playlist_streams): 
-                f.write(f'#EXTINF:-1, {name}\n{link}\n')
+        if playlist_streams:
+            with open("playlist.m3u", "w", encoding="utf-8") as f:
+                f.write("#EXTM3U\n")
+                for name, link in playlist_streams: 
+                    f.write(f'#EXTINF:-1, {name}\n{link}\n')
+            print(f"\n>>> Готово! Собрано {len(playlist_streams)} каналов в playlist.m3u")
         
         await browser.close()
-        print(f"\n>>> Скрипт успешно завершен. Файл playlist.m3u создан.", flush=True)
 
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
-
