@@ -13,6 +13,7 @@ CHANNELS = {
     "Рен ТВ": "https://smotrettv.com/316-ren-tv.html"
 }
 
+
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 
 async def get_tokens_and_make_playlist():
@@ -20,76 +21,57 @@ async def get_tokens_and_make_playlist():
 
     async with async_playwright() as p:
         print(">>> Запуск браузера...")
+        # Возвращаем стандартный Chromium для GitHub
         browser = await p.chromium.launch(headless=True, args=[
             "--no-sandbox",
             "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-blink-features=AutomationControlled"
+            "--disable-dev-shm-usage"
         ])
         
-        context = await browser.new_context(
-            user_agent=USER_AGENT,
-            viewport={'width': 1280, 'height': 720}
-        )
-        
+        context = await browser.new_context(user_agent=USER_AGENT)
         page = await context.new_page()
 
         for name, channel_url in CHANNELS.items():
             print(f"[*] Граббинг: {name}...", end=" ", flush=True)
             current_stream_url = None
 
-            # Обработчик: ловим любую ссылку с .m3u8
             async def handle_request(request):
                 nonlocal current_stream_url
                 u = request.url
-                if ".m3u8" in u:
-                    # Игнорируем явную рекламу, берем потоки с токенами или master-ссылки
-                    if any(k in u for k in ["master", "index", "playlist", "token", "m3u8"]):
-                        if not current_stream_url:
-                            current_stream_url = u
+                if ".m3u8" in u and not current_stream_url:
+                    if any(key in u for key in ["token=", "mediavitrina", "vittv", "p7live", "m3u8"]):
+                        current_stream_url = u
 
             page.on("request", handle_request)
             
             try:
-                # Ждем полной прогрузки всех скриптов
-                await page.goto(channel_url, wait_until="networkidle", timeout=60000)
-                
-                # Даем время плееру инициализироваться
+                await page.goto(channel_url, wait_until="domcontentloaded", timeout=60000)
                 await asyncio.sleep(5)
-                
-                # Имитируем активность: скролл и клики по центру плеера
-                await page.mouse.wheel(0, 300)
-                await page.mouse.click(640, 360) 
-                await asyncio.sleep(1)
+                await page.mouse.click(640, 360)
                 await page.keyboard.press("Space")
                 
-                # Ждем появления ссылки до 20 секунд
-                for _ in range(20):
-                    if current_stream_url:
-                        break
+                for _ in range(15):
+                    if current_stream_url: break
                     await asyncio.sleep(1)
 
                 if current_stream_url:
                     playlist_streams.append((name, current_stream_url))
-                    print(f"[OK]")
+                    print("[OK]")
                 else:
-                    print(f"[FAIL]")
+                    print("[FAIL]")
 
-            except Exception:
-                print(f"[ERROR]")
+            except Exception as e:
+                print(f"[ERR]")
 
             page.remove_listener("request", handle_request)
-            # Пауза между каналами, чтобы не забанили IP
-            await asyncio.sleep(random.uniform(2, 5))
+            await asyncio.sleep(random.uniform(1, 3))
 
         if playlist_streams:
             with open("playlist.m3u", "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n")
                 for name, link in playlist_streams: 
                     f.write(f'#EXTINF:-1, {name}\n{link}\n')
-            print(f"\n>>> Готово! Собрано: {len(playlist_streams)}/{len(CHANNELS)}")
-        else:
-            print("\n>>> Ошибка: ссылки не найдены (возможно, блокировка по региону).")
+            print(f"\n>>> Готово! Собрано: {len(playlist_streams)}")
         
         await browser.close()
 
