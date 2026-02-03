@@ -1,11 +1,11 @@
-name: Grab Playlist with Edge
+name: Edge Playlist Grabber
 on:
-  workflow_dispatch: # Запуск вручную кнопкой
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *' # Раз в сутки
+    - cron: '0 */6 * * *' # Запуск каждые 6 часов
 
 jobs:
-  scrape:
+  run-grabber:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,20 +19,18 @@ jobs:
       - name: Install dependencies
         run: |
           pip install playwright
-          # Устанавливаем браузеры и их системные зависимости
-          playwright install msedge
-          sudo playwright install-deps
+          python -m playwright install msedge
+          sudo python -m playwright install-deps msedge
 
-      - name: Run Script in Virtual Display
-        run: |
-          # xvfb-run создает виртуальный монитор, позволяя headless=False работать на сервере
-          xvfb-run python your_script_name.py
+      - name: Run Scraper in Virtual Display
+        run: xvfb-run python grabber.py
 
-      - name: Commit and Push Playlist
+      - name: Commit and Push
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+          git config --global user.name "Bot"
+          git config --global user.email "bot@example.com"
           git add playlist.m3u
-          git commit -m "Update playlist" || echo "No changes"
+          git commit -m "Update playlist" || exit 0
           git push
+
 
