@@ -55,7 +55,7 @@ async def get_tokens_and_make_playlist():
             
             try:
                 # Ожидание загрузки страницы
-                await page.goto(channel_url, wait_until="load", timeout=60000)
+                await page.goto(channel_url, wait_until="load", timeout=600000000)
                 await asyncio.sleep(5) 
                 
                 # Имитация клика для запуска плеера
