@@ -1,5 +1,7 @@
 #EXTM3U
 #EXTINF:-1, Россия 1
-https://edge01d.mediavitrina.ru/hls-livef1/russia1/tracks-v4a1/mono.m3u8?token=v2.Qy-G_pSfB5JvHEBhdDkLxwVJ688KuHuMEVkqfaL3_RM.S8RhoHV2DTEb4qiVMPEjn6hYzacNtXNguLYWSjCHE78.1770732944.53db242e19db5a1b58f888161e4f4058
+https://edge01d.mediavitrina.ru/hls-livef1/russia1/tracks-v4a1/mono.m3u8?token=v2.a2m4T1YUE-5et5UQoLX0bYQKKLD_VOToQBWDSh7CSMU.8bRTqaILxBoGpiLqnq6WGivRjK1DqZD4nj0NGwJtQGc.1770735455.6c31fb07ab3415bceffba8595e57797d
+#EXTINF:-1, Россия 24
+https://edge01d.mediavitrina.ru/hls-livef6/russia24/tracks-v4a1/mono.m3u8?token=v2.lbLlWC97qA7zFg-_KtuNG6Hcl9kxWBBsTjte-5ks_3w.Hf5EVyKc3K5Z_TlhWTVbtsCJOSq2UOOkdsgmwultPu4.1770735563.bdf89cde5ceaae965730306973628c7d
 #EXTINF:-1, СТС
-https://edge02d.mediavitrina.ru/hls-livef1/ctc/tracks-v4a1/mono.m3u8?token=v2.ATO1SfqS0iP9qohoOjTTIb-2OmDeWsT8YepzMJZV8rA.fU3wx0W3jciPoyo0G88HrTZgdT1fQOuvhbNx4z9EMwk.1770733199.b53c3b85e22188e6ff90ba13a88d4761
+https://edge01d.mediavitrina.ru/hls-livef6/russia24/tracks-v4a1/mono.m3u8?token=v2.lbLlWC97qA7zFg-_KtuNG6Hcl9kxWBBsTjte-5ks_3w.Hf5EVyKc3K5Z_TlhWTVbtsCJOSq2UOOkdsgmwultPu4.1770735563.bdf89cde5ceaae965730306973628c7d
