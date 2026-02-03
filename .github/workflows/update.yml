@@ -1,4 +1,4 @@
-name: Chrome Playlist Grabber
+name: Playlist Grabber
 on:
   workflow_dispatch:
   schedule:
@@ -16,25 +16,36 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Playwright and Chrome
+      - name: Cache Playwright Browsers
+        id: cache-playwright
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}
+
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install playwright
-          # Установка самого Chrome
-          python -m playwright install chrome
-          # Установка системных зависимостей для работы GUI Chrome
-          sudo $(which python) -m playwright install-deps chrome
 
-      - name: Run Scraper in Virtual Display
-        run: xvfb-run python grabber.py
+      - name: Install Playwright Chromium
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: python -m playwright install chromium --with-deps
+
+      - name: Install System Deps (always)
+        run: sudo python -m playwright install-deps chromium
+
+      - name: Run Scraper
+        run: python grabber.py
 
       - name: Commit and Push
         run: |
           git config --global user.name "Bot"
           git config --global user.email "bot@example.com"
           git add playlist.m3u
-          git commit -m "Update playlist (Chrome)" || exit 0
+          git commit -m "Update playlist" || exit 0
           git push
+
 
 
 
