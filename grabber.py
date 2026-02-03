@@ -19,26 +19,14 @@ async def get_tokens_and_make_playlist():
     playlist_streams = [] 
 
     async with async_playwright() as p:
-        print(">>> Запуск Edge в виртуальном окне...")
+        print(">>> Запуск Google Chrome в виртуальном окне...")
         browser = await p.chromium.launch(
-            channel="msedge",
-            headless=False, # xvfb на GitHub сделает его виртуально "видимым"
-            args=[
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage"
-            ]
+            channel="chrome",  # ТЕПЕРЬ CHROME
+            headless=False,
+            args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
         )
         
-        context = await browser.new_context(
-            user_agent=USER_AGENT,
-            viewport={'width': 1280, 'height': 720},
-            extra_http_headers={
-                "Referer": "https://smotrettv.com",
-                "Origin": "https://smotrettv.com"
-            }
-        )
-        
+        context = await browser.new_context(user_agent=USER_AGENT, viewport={'width': 1280, 'height': 720})
         page = await context.new_page()
 
         for name, channel_url in CHANNELS.items():
@@ -48,19 +36,16 @@ async def get_tokens_and_make_playlist():
             async def handle_request(request):
                 nonlocal current_stream_url
                 u = request.url
-                if ".m3u8" in u:
-                    if any(key in u for key in ["token=", "mediavitrina", "vittv", "p7live", "v3a1", "m3u8"]):
-                        if not current_stream_url:
-                            current_stream_url = u
+                if ".m3u8" in u and not current_stream_url:
+                    if any(key in u for key in ["token=", "mediavitrina", "vittv", "p7live", "m3u8"]):
+                        current_stream_url = u
 
             page.on("request", handle_request)
             
             try:
-                # networkidle помогает дождаться загрузки скриптов плеера
                 await page.goto(channel_url, wait_until="networkidle", timeout=60000)
                 await asyncio.sleep(5)
                 
-                # Кликаем для активации
                 await page.mouse.click(640, 360)
                 await page.keyboard.press("Space")
                 
@@ -78,18 +63,19 @@ async def get_tokens_and_make_playlist():
                 print(f"[ERR] {e}")
 
             page.remove_listener("request", handle_request)
-            await asyncio.sleep(random.uniform(1, 3))
+            await asyncio.sleep(random.uniform(2, 4))
 
         if playlist_streams:
             with open("playlist.m3u", "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n")
                 for name, link in playlist_streams: 
                     f.write(f'#EXTINF:-1, {name}\n{link}\n')
-            print(f"\n>>> Готово! Собрано: {len(playlist_streams)}/{len(CHANNELS)}")
+            print(f"\n>>> Готово! Собрано: {len(playlist_streams)}")
         
         await browser.close()
 
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
+
 
 
