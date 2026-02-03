@@ -49,7 +49,7 @@ async def get_tokens_and_make_playlist():
             
             try:
                 # 1. Переход на страницу
-                await page.goto(channel_url, wait_until="load", timeout=60000)
+                await page.goto(channel_url, wait_until="load", timeout=60000000)
                 
                 # 2. Ищем фрейм плеера и кликаем в него
                 # На smotrettv плеер часто подгружается через iframe
