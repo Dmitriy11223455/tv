@@ -19,12 +19,16 @@ async def get_tokens_and_make_playlist():
     playlist_streams = [] 
 
     async with async_playwright() as p:
-        print(">>> Запуск браузера...")
-        browser = await p.chromium.launch(headless=True, args=[
-            "--disable-blink-features=AutomationControlled",
-            "--no-sandbox",
-            "--disable-setuid-sandbox"
-        ])
+        print(">>> Запуск Edge в виртуальном окне...")
+        browser = await p.chromium.launch(
+            channel="msedge",
+            headless=False, # xvfb на GitHub сделает его виртуально "видимым"
+            args=[
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage"
+            ]
+        )
         
         context = await browser.new_context(
             user_agent=USER_AGENT,
@@ -38,15 +42,13 @@ async def get_tokens_and_make_playlist():
         page = await context.new_page()
 
         for name, channel_url in CHANNELS.items():
-            print(f"[*] Граббинг: {name}...")
+            print(f"[*] Граббинг: {name}...", end=" ", flush=True)
             current_stream_url = None
 
-            # Обработчик запросов
             async def handle_request(request):
                 nonlocal current_stream_url
                 u = request.url
                 if ".m3u8" in u:
-                    # Расширенный фильтр токенов и CDN
                     if any(key in u for key in ["token=", "mediavitrina", "vittv", "p7live", "v3a1", "m3u8"]):
                         if not current_stream_url:
                             current_stream_url = u
@@ -54,49 +56,40 @@ async def get_tokens_and_make_playlist():
             page.on("request", handle_request)
             
             try:
-                # Переход с умеренным таймаутом
-                await page.goto(channel_url, wait_until="domcontentloaded", timeout=60000)
-                
-                await page.mouse.move(640, 360)
+                # networkidle помогает дождаться загрузки скриптов плеера
+                await page.goto(channel_url, wait_until="networkidle", timeout=60000)
                 await asyncio.sleep(5)
                 
-                # Прокликиваем плеер
-                for _ in range(2):
-                    await page.mouse.click(640, 360)
-                    await asyncio.sleep(1)
-                
+                # Кликаем для активации
+                await page.mouse.click(640, 360)
                 await page.keyboard.press("Space")
                 
-                # Ждем появления ссылки
-                for _ in range(20):
+                for _ in range(15):
                     if current_stream_url: break
                     await asyncio.sleep(1)
 
                 if current_stream_url:
                     playlist_streams.append((name, current_stream_url))
-                    print(f"   [OK] {name} пойман")
+                    print("[OK]")
                 else:
-                    print(f"   [!] {name} не найден")
+                    print("[FAIL]")
 
             except Exception as e:
-                print(f"   [!] Ошибка на {name}: {e}")
+                print(f"[ERR] {e}")
 
             page.remove_listener("request", handle_request)
-            await asyncio.sleep(random.uniform(2, 5))
+            await asyncio.sleep(random.uniform(1, 3))
 
-        # ИСПРАВЛЕНО: Блок записи теперь внутри функции, с правильными отступами
         if playlist_streams:
             with open("playlist.m3u", "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n")
                 for name, link in playlist_streams: 
                     f.write(f'#EXTINF:-1, {name}\n{link}\n')
-            print(f"\n>>> Готово! Собрано каналов: {len(playlist_streams)} из {len(CHANNELS)}")
-        else:
-            print("\n>>> Ошибка: ссылки не найдены.")
+            print(f"\n>>> Готово! Собрано: {len(playlist_streams)}/{len(CHANNELS)}")
         
         await browser.close()
 
-# ИСПРАВЛЕНО: Правильная точка входа
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
+
 
