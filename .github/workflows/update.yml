@@ -1,34 +1,38 @@
-name: Update Playlist
-
+name: Grab Playlist with Edge
 on:
+  workflow_dispatch: # Запуск вручную кнопкой
   schedule:
-    - cron: '0 0 * * 1'
-  workflow_dispatch:
+    - cron: '0 0 * * *' # Раз в сутки
 
 jobs:
-  build:
+  scrape:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          
+
       - name: Install dependencies
         run: |
-          pip install playwright aiohttp
-          playwright install chrome
-          
-      - name: Run grabber
-        run: python grabber.py
-        
-      - name: Commit and Push
+          pip install playwright
+          # Устанавливаем браузеры и их системные зависимости
+          playwright install msedge
+          sudo playwright install-deps
+
+      - name: Run Script in Virtual Display
         run: |
-          git config --global user.name "Bot"
-          git config --global user.email "bot@github.com"
+          # xvfb-run создает виртуальный монитор, позволяя headless=False работать на сервере
+          xvfb-run python your_script_name.py
+
+      - name: Commit and Push Playlist
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
           git add playlist.m3u
-          git commit -m "Weekly playlist update" || exit 0
+          git commit -m "Update playlist" || echo "No changes"
           git push
 
