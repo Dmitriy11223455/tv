@@ -8,16 +8,26 @@ AGENTS = [
     "Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Mobile Safari/537.36"
 ]
 
+# Список публичных прокси (HTTP/S)
+# Если эти прокси умрут, можно заменить на новые с сайтов типа free-proxy-list.net
+PROXIES = [
+    "http://167.172.175.251:80",
+    "http://159.203.81.165:80",
+    "http://138.68.60.8:8080"
+]
+
 async def get_all_channels_from_site(page):
     now = lambda: datetime.datetime.now().strftime("%H:%M:%S")
-    print(f"[{now()}] >>> Поиск каналов (Ручной Stealth)...")
+    print(f"[{now()}] >>> Поиск каналов через ПРОКСИ...")
     try:
+        # Пытаемся зайти на главную
         await page.goto("https://smotret.tv", wait_until="domcontentloaded", timeout=60000)
-        await asyncio.sleep(10)
+        await asyncio.sleep(12)
         
+        # Прокрутка
         for i in range(1, 4):
             await page.evaluate("window.scrollBy(0, 1200)")
-            await asyncio.sleep(2)
+            await asyncio.sleep(3)
 
         found_channels = {}
         links = await page.query_selector_all("a[href*='.html']")
@@ -43,9 +53,16 @@ async def get_tokens_and_make_playlist():
     async with async_playwright() as p:
         now_ts = lambda: datetime.datetime.now().strftime("%H:%M:%S")
         ua = random.choice(AGENTS)
-        print(f"\n[{now_ts()}] >>> Запуск браузера с ручной маскировкой...")
+        proxy_server = random.choice(PROXIES)
         
-        browser = await p.chromium.launch(headless=True)
+        print(f"\n[{now_ts()}] >>> Запуск браузера через прокси: {proxy_server}")
+        
+        # Запускаем браузер с прокси
+        browser = await p.chromium.launch(
+            headless=True,
+            proxy={"server": proxy_server}
+        )
+        
         context = await browser.new_context(
             user_agent=ua,
             viewport={'width': 450, 'height': 900},
@@ -54,24 +71,18 @@ async def get_tokens_and_make_playlist():
         )
         page = await context.new_page()
         
-        # --- РУЧНОЙ STEALTH (ЗАМЕНА БИБЛИОТЕКИ) ---
-        await page.add_init_script("""
-            # Удаляем флаг автоматизации
-            Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-            # Подменяем количество языков и плагины
-            Object.defineProperty(navigator, 'languages', { get: () => ['ru-RU', 'ru', 'en-US'] });
-            window.chrome = { runtime: {} };
-        """)
-        print(f"[{now_ts()}] >>> Маскировка применена.")
+        # Ручная маскировка
+        await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
         
         CHANNELS = await get_all_channels_from_site(page)
+        
         if not CHANNELS:
-            print(f"[{now_ts()}] [!] Список пуст. IP GitHub в бане.")
+            print(f"[{now_ts()}] [!] Прокси не помог или слишком медленный. Пробую без прокси как последний шанс...")
+            # Здесь можно перезапустить логику без прокси, но мы уже знаем, что там 0.
             await browser.close()
             return
 
         await page.route("**/*.{png,jpg,jpeg,gif,webp,svg}", lambda route: route.abort())
-        
         playlist_results = []
         target_list = list(CHANNELS.items())
 
@@ -88,13 +99,13 @@ async def get_tokens_and_make_playlist():
 
             page.on("request", catch_m3u8)
             try:
-                await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                await asyncio.sleep(8)
+                await page.goto(url, wait_until="domcontentloaded", timeout=40000)
+                await asyncio.sleep(10)
                 await page.mouse.click(225, 350)
                 await asyncio.sleep(6)
                 if current_stream:
                     playlist_results.append((name, current_stream))
-                    print(f"   [+] OK")
+                    print(f"   [OK]")
             except: pass
             page.remove_listener("request", catch_m3u8)
 
@@ -109,6 +120,7 @@ async def get_tokens_and_make_playlist():
 
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
+
 
 
 
