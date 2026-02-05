@@ -2,8 +2,7 @@ import asyncio
 import random
 import datetime
 from playwright.async_api import async_playwright
-# Импортируем сам модуль
-import playwright_stealth
+from playwright_stealth import stealth  # Прямой импорт функции
 
 AGENTS = [
     "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36",
@@ -12,15 +11,15 @@ AGENTS = [
 
 async def get_all_channels_from_site(page):
     now = lambda: datetime.datetime.now().strftime("%H:%M:%S")
-    print(f"[{now()}] >>> Стелс-сканирование...")
+    print(f"[{now()}] >>> Стелс-сканирование главной страницы...")
     try:
-        # Увеличиваем таймаут и ждем именно загрузки контента
+        # Убираем жесткое ожидание networkidle, используем domcontentloaded
         await page.goto("https://smotret.tv", wait_until="domcontentloaded", timeout=60000)
         await asyncio.sleep(10)
         
-        # Скроллим медленнее
+        # Медленный скролл для имитации человека
         for i in range(1, 4):
-            await page.evaluate("window.scrollBy(0, 1000)")
+            await page.evaluate("window.scrollBy(0, 1200)")
             await asyncio.sleep(2)
 
         found_channels = {}
@@ -31,16 +30,17 @@ async def get_all_channels_from_site(page):
             title = await el.get_attribute("title") or await el.inner_text()
             
             if url and title and any(c.isdigit() for c in url):
-                if any(x in url for x in ["about", "contact", "rules", "dmca"]): continue
+                if any(x in url for x in ["about", "contact", "rules", "dmca", "feedback"]): continue
                 full_url = url if url.startswith("http") else f"https://smotret.tv{url}"
+                # Исправлена обработка имени
                 clean_name = title.strip().split('\n')[0]
-                if full_url not in found_channels.values():
+                if full_url not in found_channels.values() and len(clean_name) > 1:
                     found_channels[clean_name] = full_url
         
         print(f"[{now()}] [OK] Найдено каналов: {len(found_channels)}")
         return found_channels
     except Exception as e:
-        print(f"[{now()}] [!] Ошибка: {e}")
+        print(f"[{now()}] [!] Ошибка сканирования: {e}")
         return {}
 
 async def get_tokens_and_make_playlist():
@@ -58,41 +58,58 @@ async def get_tokens_and_make_playlist():
         )
         page = await context.new_page()
         
-        # ПРАВИЛЬНЫЙ ВЫЗОВ STEALTH ДЛЯ АСИНХРОННОГО РЕЖИМА
-        await playwright_stealth.stealth_async(page)
-        print(f"[{now_ts()}] >>> Stealth режим активирован успешно.")
+        # ПРАВИЛЬНЫЙ ВЫЗОВ ФУНКЦИИ
+        await stealth(page)
+        print(f"[{now_ts()}] >>> Stealth режим активирован.")
         
         CHANNELS = await get_all_channels_from_site(page)
         if not CHANNELS:
-            print("[!] Список пуст. IP GitHub заблокирован.")
+            print(f"[{now_ts()}] [!] Список пуст. Сайт блокирует IP GitHub.")
             await browser.close()
             return
 
-        await page.route("**/*.{png,jpg,jpeg,gif,webp,svg}", lambda route: route.abort())
+        # Блокируем картинки только на этапе захода в каналы
+        await page.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2}", lambda route: route.abort())
+        
         playlist_results = []
         target_list = list(CHANNELS.items())
 
         for counter, (name, url) in enumerate(target_list, 1):
-            print(f"[{now_ts()}] [{counter}/{len(target_list)}] Граббинг: {name}")
+            ts = now_ts()
+            print(f"[{ts}] [{counter}/{len(target_list)}] Граббинг: {name}")
             current_stream = None
 
             async def catch_m3u8(request):
                 nonlocal current_stream
-                if ".m3u8" in request.url and len(request.url) > 60:
-                    if not any(x in request.url for x in ["/ads/", "track", "pixel"]):
-                        current_stream = request.url
+                u = request.url
+                if ".m3u8" in u and len(u) > 60:
+                    if not any(x in u for x in ["/ads/", "track", "pixel", "telemetree"]):
+                        if not current_stream:
+                            current_stream = u
+                            print(f"   [+] Поток захвачен")
 
             page.on("request", catch_m3u8)
             try:
                 await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                await asyncio.sleep(10)
+                await asyncio.sleep(8)
+                
+                # Клик по плееру (тап)
                 await page.mouse.click(225, 350)
                 await asyncio.sleep(6)
+                
                 if current_stream:
                     playlist_results.append((name, current_stream))
-                    print(f"   [+] OK")
-            except: pass
+                else:
+                    # Вторая попытка клика
+                    await page.mouse.click(225, 450)
+                    await asyncio.sleep(4)
+                    if current_stream:
+                        playlist_results.append((name, current_stream))
+            except:
+                pass
+            
             page.remove_listener("request", catch_m3u8)
+            await asyncio.sleep(1)
 
         if playlist_results:
             with open("playlist.m3u", "w", encoding="utf-8") as f:
@@ -100,8 +117,10 @@ async def get_tokens_and_make_playlist():
                 for n, l in playlist_results:
                     f.write(f'#EXTINF:-1, {n}\n{l}|Referer=https://smotrettv.com{ua}\n')
             print(f"\n[{now_ts()}] ИТОГ: Собрано {len(playlist_results)} каналов.")
+        
         await browser.close()
 
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
+
 
