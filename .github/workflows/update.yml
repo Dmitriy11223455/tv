@@ -18,8 +18,7 @@ jobs:
 
       - name: Install dependencies and browsers
         run: |
-          pip install playwright PyYAML
-          # Установка самого браузера Chromium и системных библиотек Linux
+          pip install playwright playwright-stealth
           playwright install --with-deps chromium
 
       - name: Run grabber script
