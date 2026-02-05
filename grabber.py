@@ -2,7 +2,7 @@ import asyncio
 import random
 import datetime
 from playwright.async_api import async_playwright
-from playwright_stealth import stealth_async
+from playwright_stealth import stealth
 
 # Список разных мобильных агентов для скрытности
 AGENTS = [
