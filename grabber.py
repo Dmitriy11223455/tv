@@ -2,8 +2,8 @@ import asyncio
 import random
 import datetime
 from playwright.async_api import async_playwright
-# Импортируем весь модуль целиком
-import playwright_stealth
+# ПРАВИЛЬНЫЙ ИМПОРТ: заходим внутрь модуля к функции
+from playwright_stealth.stealth import stealth_async
 
 AGENTS = [
     "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36",
@@ -57,14 +57,9 @@ async def get_tokens_and_make_playlist():
         )
         page = await context.new_page()
         
-        # ПРАВИЛЬНЫЙ ВЫЗОВ ЧЕРЕЗ ПОЛНЫЙ ПУТЬ К ФУНКЦИИ
-        # Пробуем вызвать асинхронную версию, если она есть, иначе обычную
-        try:
-            await playwright_stealth.stealth_async(page)
-        except AttributeError:
-            await playwright_stealth.stealth(page)
-            
-        print(f"[{now_ts()}] >>> Stealth режим активирован.")
+        # ТЕПЕРЬ ВЫЗОВ ТОЧНО СРАБОТАЕТ
+        await stealth_async(page)
+        print(f"[{now_ts()}] >>> Stealth режим активирован успешно.")
         
         CHANNELS = await get_all_channels_from_site(page)
         if not CHANNELS:
