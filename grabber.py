@@ -2,53 +2,45 @@ import asyncio
 import random
 import datetime
 from playwright.async_api import async_playwright
-
-# Универсальный импорт stealth
-try:
-    from playwright_stealth import stealth_async as stealth_func
-except ImportError:
-    try:
-        from playwright_stealth import stealth as stealth_func
-    except ImportError:
-        stealth_func = None
+# Импортируем сам модуль
+import playwright_stealth
 
 AGENTS = [
     "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1"
+    "Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Mobile Safari/537.36"
 ]
 
 async def get_all_channels_from_site(page):
     now = lambda: datetime.datetime.now().strftime("%H:%M:%S")
-    print(f"[{now()}] >>> Стелс-сканирование главной страницы...")
+    print(f"[{now()}] >>> Стелс-сканирование...")
     try:
+        # Увеличиваем таймаут и ждем именно загрузки контента
         await page.goto("https://smotret.tv", wait_until="domcontentloaded", timeout=60000)
-        await asyncio.sleep(random.randint(5, 8))
+        await asyncio.sleep(10)
         
-        for i in range(1, 5):
-            await page.mouse.wheel(0, random.randint(1500, 2500))
-            await asyncio.sleep(random.uniform(1, 2))
+        # Скроллим медленнее
+        for i in range(1, 4):
+            await page.evaluate("window.scrollBy(0, 1000)")
+            await asyncio.sleep(2)
 
         found_channels = {}
         links = await page.query_selector_all("a[href*='.html']")
         
         for el in links:
             url = await el.get_attribute("href")
-            title = await el.get_attribute("title")
-            text = await el.inner_text()
-            name = title if title else text
+            title = await el.get_attribute("title") or await el.inner_text()
             
-            if url and name and any(c.isdigit() for c in url):
+            if url and title and any(c.isdigit() for c in url):
                 if any(x in url for x in ["about", "contact", "rules", "dmca"]): continue
                 full_url = url if url.startswith("http") else f"https://smotret.tv{url}"
-                clean_name = name.strip().split('\n')[0]
-                if len(clean_name) > 1 and full_url not in found_channels.values():
+                clean_name = title.strip().split('\n')[0]
+                if full_url not in found_channels.values():
                     found_channels[clean_name] = full_url
         
         print(f"[{now()}] [OK] Найдено каналов: {len(found_channels)}")
         return found_channels
     except Exception as e:
-        print(f"[{now()}] [!] Ошибка сканирования: {e}")
+        print(f"[{now()}] [!] Ошибка: {e}")
         return {}
 
 async def get_tokens_and_make_playlist():
@@ -66,17 +58,13 @@ async def get_tokens_and_make_playlist():
         )
         page = await context.new_page()
         
-        # Применяем стелс, если библиотека загрузилась
-        if stealth_func:
-            try:
-                await stealth_func(page)
-                print(f"[{now_ts()}] >>> Stealth режим активирован.")
-            except:
-                print(f"[{now_ts()}] [!] Не удалось применить Stealth.")
+        # ПРАВИЛЬНЫЙ ВЫЗОВ STEALTH ДЛЯ АСИНХРОННОГО РЕЖИМА
+        await playwright_stealth.stealth_async(page)
+        print(f"[{now_ts()}] >>> Stealth режим активирован успешно.")
         
         CHANNELS = await get_all_channels_from_site(page)
         if not CHANNELS:
-            print("[!] Список каналов пуст.")
+            print("[!] Список пуст. IP GitHub заблокирован.")
             await browser.close()
             return
 
@@ -97,7 +85,7 @@ async def get_tokens_and_make_playlist():
             page.on("request", catch_m3u8)
             try:
                 await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                await asyncio.sleep(random.randint(7, 10))
+                await asyncio.sleep(10)
                 await page.mouse.click(225, 350)
                 await asyncio.sleep(6)
                 if current_stream:
@@ -105,7 +93,6 @@ async def get_tokens_and_make_playlist():
                     print(f"   [+] OK")
             except: pass
             page.remove_listener("request", catch_m3u8)
-            await asyncio.sleep(random.uniform(1, 2))
 
         if playlist_results:
             with open("playlist.m3u", "w", encoding="utf-8") as f:
@@ -117,5 +104,4 @@ async def get_tokens_and_make_playlist():
 
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
-
 
