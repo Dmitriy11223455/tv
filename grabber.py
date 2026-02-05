@@ -2,10 +2,9 @@ import asyncio
 import random
 import datetime
 from playwright.async_api import async_playwright
-# Правильный импорт
-from playwright_stealth import stealth 
+# ИСПРАВЛЕННЫЙ ИМПОРТ
+from playwright_stealth import stealth_async
 
-# Список разных мобильных агентов
 AGENTS = [
     "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36",
     "Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Mobile Safari/537.36",
@@ -28,14 +27,14 @@ async def get_all_channels_from_site(page):
         
         for el in links:
             url = await el.get_attribute("href")
-            name = await el.get_attribute("title") or await el.inner_text()
+            title = await el.get_attribute("title")
+            text = await el.inner_text()
+            name = title if title else text
             
             if url and name and any(c.isdigit() for c in url):
                 if any(x in url for x in ["about", "contact", "rules", "dmca"]): continue
-                
                 full_url = url if url.startswith("http") else f"https://smotret.tv{url}"
                 clean_name = name.strip().split('\n')[0]
-                
                 if len(clean_name) > 2 and full_url not in found_channels.values():
                     found_channels[clean_name] = full_url
         
@@ -49,7 +48,7 @@ async def get_tokens_and_make_playlist():
     async with async_playwright() as p:
         now_ts = lambda: datetime.datetime.now().strftime("%H:%M:%S")
         ua = random.choice(AGENTS)
-        print(f"\n[{now_ts()}] >>> Запуск браузера (UA: {ua[:40]}...)")
+        print(f"\n[{now_ts()}] >>> Запуск браузера...")
         
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
@@ -60,8 +59,8 @@ async def get_tokens_and_make_playlist():
         )
         page = await context.new_page()
         
-        # ПРАВИЛЬНЫЙ ВЫЗОВ (без асинхронного префикса)
-        await stealth(page) 
+        # ИСПРАВЛЕННЫЙ ВЫЗОВ
+        await stealth_async(page) 
         
         CHANNELS = await get_all_channels_from_site(page)
         if not CHANNELS:
@@ -70,7 +69,6 @@ async def get_tokens_and_make_playlist():
             return
 
         await page.route("**/*.{png,jpg,jpeg,gif,webp,svg}", lambda route: route.abort())
-
         playlist_results = []
         target_list = list(CHANNELS.items())
 
@@ -85,19 +83,15 @@ async def get_tokens_and_make_playlist():
                         current_stream = request.url
 
             page.on("request", catch_m3u8)
-            
             try:
                 await page.goto(url, wait_until="domcontentloaded", timeout=30000)
                 await asyncio.sleep(random.randint(7, 10))
-                await page.mouse.move(random.randint(100, 300), random.randint(200, 400), steps=5)
                 await page.mouse.click(225, 350)
                 await asyncio.sleep(6)
-                
                 if current_stream:
                     playlist_results.append((name, current_stream))
                     print(f"   [+] OK")
             except: pass
-            
             page.remove_listener("request", catch_m3u8)
             await asyncio.sleep(random.uniform(1, 2))
 
@@ -107,9 +101,9 @@ async def get_tokens_and_make_playlist():
                 for n, l in playlist_results:
                     f.write(f'#EXTINF:-1, {n}\n{l}|Referer=https://smotrettv.com{ua}\n')
             print(f"\n[{now_ts()}] ИТОГ: Собрано {len(playlist_results)} каналов.")
-        
         await browser.close()
 
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
+
 
