@@ -1,3 +1,5 @@
 #EXTM3U
 #EXTINF:-1, Россия 1
-https://edge01r.mediavitrina.ru/hls-livef1/russia1/tracks-v4a1/mono.m3u8?token=v2.RzJheV2eemEpwq51PEwXPN8SNKaAQQpTJH40Oi9h0iE.yBrSgRaHfwtQ9AGcI4fFlPQQNzIkYhVAr-tkAqrSUk8.1770880293.654baf7cc831679803cdeea4a2795faf
+https://edge01d.mediavitrina.ru/hls-livef1/russia1/tracks-v4a1/mono.m3u8?token=v2.ZTwvucBumPZ7BtK620liQwmKW_L8VNqefELPzCNXVjg.cYGJ1rerA-DsFLVrNWJSS8RVCf0UMoxJR9P5eGzE8Iw.1770902421.4f4c5b5a03c4dc7058cf6486f323b8d7
+#EXTINF:-1, Россия 24
+https://edge02r.mediavitrina.ru/hls-livef6/russia24/tracks-v4a1/mono.m3u8?token=v2.zVmaDPXf9R9v9bHFaWS0FAfgfkXnbMZE46NUU18sP2M.gl0yxGnX9veZXt4hWMCatrADNHx7GwWbuhTK9FAqjaU.1770902542.707252e1b8cd21fabc169d378614ced0
