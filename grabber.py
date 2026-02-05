@@ -2,8 +2,15 @@ import asyncio
 import random
 import datetime
 from playwright.async_api import async_playwright
-# ИСПРАВЛЕННЫЙ ИМПОРТ
-from playwright_stealth import stealth_async
+
+# Универсальный импорт stealth
+try:
+    from playwright_stealth import stealth_async as stealth_func
+except ImportError:
+    try:
+        from playwright_stealth import stealth as stealth_func
+    except ImportError:
+        stealth_func = None
 
 AGENTS = [
     "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36",
@@ -35,7 +42,7 @@ async def get_all_channels_from_site(page):
                 if any(x in url for x in ["about", "contact", "rules", "dmca"]): continue
                 full_url = url if url.startswith("http") else f"https://smotret.tv{url}"
                 clean_name = name.strip().split('\n')[0]
-                if len(clean_name) > 2 and full_url not in found_channels.values():
+                if len(clean_name) > 1 and full_url not in found_channels.values():
                     found_channels[clean_name] = full_url
         
         print(f"[{now()}] [OK] Найдено каналов: {len(found_channels)}")
@@ -59,12 +66,17 @@ async def get_tokens_and_make_playlist():
         )
         page = await context.new_page()
         
-        # ИСПРАВЛЕННЫЙ ВЫЗОВ
-        await stealth_async(page) 
+        # Применяем стелс, если библиотека загрузилась
+        if stealth_func:
+            try:
+                await stealth_func(page)
+                print(f"[{now_ts()}] >>> Stealth режим активирован.")
+            except:
+                print(f"[{now_ts()}] [!] Не удалось применить Stealth.")
         
         CHANNELS = await get_all_channels_from_site(page)
         if not CHANNELS:
-            print("[!] Каналы не найдены.")
+            print("[!] Список каналов пуст.")
             await browser.close()
             return
 
