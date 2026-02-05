@@ -2,7 +2,8 @@ import asyncio
 import random
 import datetime
 from playwright.async_api import async_playwright
-from playwright_stealth import stealth  # Прямой импорт функции
+# Импортируем весь модуль целиком
+import playwright_stealth
 
 AGENTS = [
     "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36",
@@ -13,11 +14,9 @@ async def get_all_channels_from_site(page):
     now = lambda: datetime.datetime.now().strftime("%H:%M:%S")
     print(f"[{now()}] >>> Стелс-сканирование главной страницы...")
     try:
-        # Убираем жесткое ожидание networkidle, используем domcontentloaded
         await page.goto("https://smotret.tv", wait_until="domcontentloaded", timeout=60000)
         await asyncio.sleep(10)
         
-        # Медленный скролл для имитации человека
         for i in range(1, 4):
             await page.evaluate("window.scrollBy(0, 1200)")
             await asyncio.sleep(2)
@@ -32,7 +31,7 @@ async def get_all_channels_from_site(page):
             if url and title and any(c.isdigit() for c in url):
                 if any(x in url for x in ["about", "contact", "rules", "dmca", "feedback"]): continue
                 full_url = url if url.startswith("http") else f"https://smotret.tv{url}"
-                # Исправлена обработка имени
+                
                 clean_name = title.strip().split('\n')[0]
                 if full_url not in found_channels.values() and len(clean_name) > 1:
                     found_channels[clean_name] = full_url
@@ -58,8 +57,13 @@ async def get_tokens_and_make_playlist():
         )
         page = await context.new_page()
         
-        # ПРАВИЛЬНЫЙ ВЫЗОВ ФУНКЦИИ
-        await stealth(page)
+        # ПРАВИЛЬНЫЙ ВЫЗОВ ЧЕРЕЗ ПОЛНЫЙ ПУТЬ К ФУНКЦИИ
+        # Пробуем вызвать асинхронную версию, если она есть, иначе обычную
+        try:
+            await playwright_stealth.stealth_async(page)
+        except AttributeError:
+            await playwright_stealth.stealth(page)
+            
         print(f"[{now_ts()}] >>> Stealth режим активирован.")
         
         CHANNELS = await get_all_channels_from_site(page)
@@ -68,7 +72,6 @@ async def get_tokens_and_make_playlist():
             await browser.close()
             return
 
-        # Блокируем картинки только на этапе захода в каналы
         await page.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2}", lambda route: route.abort())
         
         playlist_results = []
@@ -92,15 +95,12 @@ async def get_tokens_and_make_playlist():
             try:
                 await page.goto(url, wait_until="domcontentloaded", timeout=30000)
                 await asyncio.sleep(8)
-                
-                # Клик по плееру (тап)
                 await page.mouse.click(225, 350)
                 await asyncio.sleep(6)
                 
                 if current_stream:
                     playlist_results.append((name, current_stream))
                 else:
-                    # Вторая попытка клика
                     await page.mouse.click(225, 450)
                     await asyncio.sleep(4)
                     if current_stream:
@@ -122,5 +122,6 @@ async def get_tokens_and_make_playlist():
 
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
+
 
 
