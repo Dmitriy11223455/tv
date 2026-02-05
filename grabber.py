@@ -120,7 +120,7 @@ async def get_tokens_and_make_playlist():
             with open("playlist.m3u", "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n")
                 for n, l in playlist_results:
-                    f.write(f'#EXTINF:-1, {n}\n{l}|Referer=https://smotret.tv{USER_AGENT}\n')
+                    f.write(f'#EXTINF:-1, {n}\n{l}|Referer=https://smotrettv.com{USER_AGENT}\n')
             print(f"\n[{now_ts()}] ГОТОВО! Собрано каналов: {len(playlist_results)}")
         
         await browser.close()
