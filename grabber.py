@@ -1,98 +1,119 @@
 import asyncio
 import random
+import datetime
 from playwright.async_api import async_playwright
+from playwright_stealth import stealth_async
 
-CHANNELS = {
-    "Первый канал": "https://smotrettv.com/public/1003-pervyj-kanal.html",
-    "Россия 1": "https://smotrettv.com/public/784-rossija-1.html",
-    "Звезда": "https://smotrettv.com/public/310-zvezda.html",
-    "ТНТ": "https://smotrettv.com/entertainment/329-tnt.html",
-    "Россия 24": "https://smotrettv.com/news/217-rossija-24.html",
-    "СТС": "https://smotrettv.com/entertainment/783-sts.html",
-    "НТВ": "https://smotrettv.com/public/6-ntv.html",
-    "Рен ТВ": "https://smotrettv.com/public/316-ren-tv.html"
-}
+# Список разных мобильных агентов для скрытности
+AGENTS = [
+    "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36",
+    "Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Mobile Safari/537.36",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1"
+]
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+async def get_all_channels_from_site(page):
+    now = lambda: datetime.datetime.now().strftime("%H:%M:%S")
+    print(f"[{now()}] >>> Стелс-сканирование главной страницы...")
+    try:
+        # Заходим на сайт
+        await page.goto("https://smotret.tv", wait_until="domcontentloaded", timeout=60000)
+        await asyncio.sleep(random.randint(5, 8))
+        
+        # Имитируем человеческий скролл
+        for i in range(1, 5):
+            await page.mouse.wheel(0, random.randint(1500, 2500))
+            await asyncio.sleep(random.uniform(1, 2))
+
+        found_channels = {}
+        # Собираем ссылки на каналы (любые .html страницы с цифрами)
+        links = await page.query_selector_all("a[href*='.html']")
+        
+        for el in links:
+            url = await el.get_attribute("href")
+            name = await el.get_attribute("title") or await el.inner_text()
+            
+            if url and name and any(c.isdigit() for c in url):
+                if any(x in url for x in ["about", "contact", "rules", "dmca"]): continue
+                
+                full_url = url if url.startswith("http") else f"https://smotret.tv{url}"
+                clean_name = name.strip().split('\n')[0]
+                
+                if len(clean_name) > 2 and full_url not in found_channels.values():
+                    found_channels[clean_name] = full_url
+        
+        print(f"[{now()}] [OK] Стелс-режим сработал! Найдено каналов: {len(found_channels)}")
+        return found_channels
+    except Exception as e:
+        print(f"[{now()}] [!] Ошибка сканирования: {e}")
+        return {}
 
 async def get_tokens_and_make_playlist():
-    playlist_streams = [] 
-
     async with async_playwright() as p:
-        print(">>> Запуск браузера...")
-        browser = await p.chromium.launch(headless=True, args=[
-            "--disable-blink-features=AutomationControlled",
-            "--no-sandbox"
-        ])
+        now_ts = lambda: datetime.datetime.now().strftime("%H:%M:%S")
+        ua = random.choice(AGENTS)
+        print(f"\n[{now_ts()}] >>> Запуск браузера (UA: {ua[:40]}...)")
         
+        browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
-            user_agent=USER_AGENT,
-            viewport={'width': 1280, 'height': 720},
-            extra_http_headers={"Referer": "https://smotrettv.com"}
+            user_agent=ua,
+            viewport={'width': 450, 'height': 900},
+            is_mobile=True,
+            has_touch=True
         )
-        
         page = await context.new_page()
+        
+        # Активируем режим Скрытности (Stealth)
+        await stealth_async(page)
+        
+        # Собираем список всех каналов
+        CHANNELS = await get_all_channels_from_site(page)
+        if not CHANNELS:
+            print("[!] Каналы не найдены. Сайт переиграл нас.")
+            await browser.close()
+            return
 
-        for name, channel_url in CHANNELS.items():
-            print(f"[*] Граббинг: {name}...")
-            current_stream_url = None
+        # Блокировка рекламы
+        await page.route("**/*.{png,jpg,jpeg,gif,webp,svg}", lambda route: route.abort())
 
-            # Глобальный перехватчик (видит запросы из всех фреймов)
-            async def handle_request(request):
-                nonlocal current_stream_url
-                url = request.url
-                if ".m3u8" in url and ("token=" in url or "mediavitrina" in url):
-                    if not current_stream_url:
-                        current_stream_url = url
+        playlist_results = []
+        target_list = list(CHANNELS.items())
 
-            context.on("request", handle_request)
+        for counter, (name, url) in enumerate(target_list, 1):
+            print(f"[{now_ts()}] [{counter}/{len(target_list)}] Граббинг: {name}")
+            current_stream = None
+
+            async def catch_m3u8(request):
+                nonlocal current_stream
+                if ".m3u8" in request.url and len(request.url) > 60:
+                    if not any(x in request.url for x in ["/ads/", "track", "pixel"]):
+                        current_stream = request.url
+
+            page.on("request", catch_m3u8)
             
             try:
-                # 1. Переход на страницу
-                await page.goto(channel_url, wait_until="load", timeout=60000000)
+                await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                await asyncio.sleep(random.randint(7, 10))
                 
-                # 2. Ищем фрейм плеера и кликаем в него
-                # На smotrettv плеер часто подгружается через iframe
-                await asyncio.sleep(5)
-                frames = page.frames
-                for frame in frames:
-                    try:
-                        # Пытаемся кликнуть в центре каждого фрейма, чтобы запустить видео
-                        await page.mouse.click(640, 360)
-                    except:
-                        continue
+                # Имитируем человеческий тап по плееру
+                await page.mouse.move(random.randint(100, 300), random.randint(200, 400), steps=5)
+                await page.mouse.click(225, 350)
+                await asyncio.sleep(6)
+                
+                if current_stream:
+                    playlist_results.append((name, current_stream))
+                    print(f"   [+] OK")
+            except: pass
+            
+            page.remove_listener("request", catch_m3u8)
+            await asyncio.sleep(random.uniform(1, 2))
 
-                # 3. Ждем появления ссылки (до 15 секунд)
-                for _ in range(15):
-                    if current_stream_url: break
-                    await asyncio.sleep(1)
-
-                if current_stream_url:
-                    playlist_streams.append((name, current_stream_url))
-                    print(f"   [OK] Ссылка поймана")
-                else:
-                    # Если не нашли, пробуем нажать кнопку Play через клавиатуру
-                    await page.keyboard.press("Space")
-                    await asyncio.sleep(5)
-                    if current_stream_url:
-                        playlist_streams.append((name, current_stream_url))
-                        print(f"   [OK] Ссылка поймана после нажатия Space")
-                    else:
-                        print(f"   [!] Ссылка не найдена")
-
-            except Exception as e:
-                print(f"   [!] Ошибка на {name}: {e}")
-
-            context.remove_listener("request", handle_request)
-            await asyncio.sleep(random.uniform(2, 4))
-
-        # Запись результата
-        if playlist_streams:
+        # Сохранение плейлиста
+        if playlist_results:
             with open("playlist.m3u", "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n")
-                for name, link in playlist_streams: 
-                    f.write(f'#EXTINF:-1, {name}\n{link}\n')
-            print(f"\n>>> Готово! Собрано каналов: {len(playlist_streams)}")
+                for n, l in playlist_results:
+                    f.write(f'#EXTINF:-1, {n}\n{l}|Referer=https://smotrettv.com{ua}\n')
+            print(f"\n[{now_ts()}] ИТОГ: Плейлист на {len(playlist_results)} каналов обновлен.")
         
         await browser.close()
 
