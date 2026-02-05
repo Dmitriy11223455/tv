@@ -8,25 +8,22 @@ AGENTS = [
     "Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Mobile Safari/537.36"
 ]
 
-# Список публичных прокси (HTTP/S)
-# Если эти прокси умрут, можно заменить на новые с сайтов типа free-proxy-list.net
+# Обновленные прокси
 PROXIES = [
-    "http://167.172.175.251:80",
-    "http://159.203.81.165:80",
-    "http://138.68.60.8:8080"
+    "http://188.166.162.153:3128",
+    "http://165.22.122.25:80"
 ]
 
 async def get_all_channels_from_site(page):
     now = lambda: datetime.datetime.now().strftime("%H:%M:%S")
-    print(f"[{now()}] >>> Поиск каналов через ПРОКСИ...")
+    print(f"[{now()}] >>> Сканирование через ПРОКСИ (с обходом SSL)...")
     try:
-        # Пытаемся зайти на главную
-        await page.goto("https://smotret.tv", wait_until="domcontentloaded", timeout=60000)
-        await asyncio.sleep(12)
+        # Увеличиваем таймаут, прокси бывают медленными
+        await page.goto("https://smotret.tv/", wait_until="domcontentloaded", timeout=60000)
+        await asyncio.sleep(15)
         
-        # Прокрутка
         for i in range(1, 4):
-            await page.evaluate("window.scrollBy(0, 1200)")
+            await page.evaluate("window.scrollBy(0, 1500)")
             await asyncio.sleep(3)
 
         found_channels = {}
@@ -55,30 +52,30 @@ async def get_tokens_and_make_playlist():
         ua = random.choice(AGENTS)
         proxy_server = random.choice(PROXIES)
         
-        print(f"\n[{now_ts()}] >>> Запуск браузера через прокси: {proxy_server}")
+        print(f"\n[{now_ts()}] >>> Запуск браузера через {proxy_server}")
         
-        # Запускаем браузер с прокси
         browser = await p.chromium.launch(
             headless=True,
             proxy={"server": proxy_server}
         )
         
+        # КЛЮЧЕВОЙ МОМЕНТ: ignore_https_errors=True
         context = await browser.new_context(
             user_agent=ua,
             viewport={'width': 450, 'height': 900},
             is_mobile=True,
-            has_touch=True
+            has_touch=True,
+            ignore_https_errors=True
         )
         page = await context.new_page()
         
-        # Ручная маскировка
+        # Маскировка
         await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
         
         CHANNELS = await get_all_channels_from_site(page)
         
         if not CHANNELS:
-            print(f"[{now_ts()}] [!] Прокси не помог или слишком медленный. Пробую без прокси как последний шанс...")
-            # Здесь можно перезапустить логику без прокси, но мы уже знаем, что там 0.
+            print(f"[{now_ts()}] [!] Прокси не выдал список. Завершение.")
             await browser.close()
             return
 
@@ -100,9 +97,9 @@ async def get_tokens_and_make_playlist():
             page.on("request", catch_m3u8)
             try:
                 await page.goto(url, wait_until="domcontentloaded", timeout=40000)
-                await asyncio.sleep(10)
+                await asyncio.sleep(12)
                 await page.mouse.click(225, 350)
-                await asyncio.sleep(6)
+                await asyncio.sleep(8)
                 if current_stream:
                     playlist_results.append((name, current_stream))
                     print(f"   [OK]")
