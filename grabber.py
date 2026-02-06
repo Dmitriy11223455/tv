@@ -45,7 +45,7 @@ async def get_tokens_and_make_playlist():
     async with async_playwright() as p:
         print(">>> Запуск браузера...")
         # Если снова будет 0 каналов, поменяйте headless=True на headless=False
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=False)
         context = await browser.new_context(user_agent=USER_AGENT)
         page = await context.new_page()
         
