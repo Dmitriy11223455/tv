@@ -1,51 +1,36 @@
 #EXTM3U
-#EXTINF:-1, ОТР
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Спас
-https://bl.rutube.ru/livestream/2bbfa9ebf9d79ade480d7281fcef1008/index.m3u8?s=TR_i5nXODiYb4NY2B1RiCg&e=2070383934&scheme=https|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Домашний
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, ТВ3
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Пятница
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Мир
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
+# UPDATED: 2026-02-06 15:23:25.901242
+#EXTINF:-1, РОССИЯ 1
+https://edge02d.mediavitrina.ru/hls-livef1/russia1/tracks-v4a1/mono.m3u8?token=v2.pnorua7YP9WvxenjbkowZDUljzOAqDU47-Rw13MSBOE.wxUf5sZ7bijylzIQF9YGSVow9M6q_uDFBWm6l_pN3xw.1770995411.a9bd04043edcb03fa7728a839a3b8cad
+#EXTINF:-1, ПЕРВЫЙ КАНАЛ
+https://edge02d.mediavitrina.ru/hls-livef1/russia1/tracks-v4a1/mono.m3u8?token=v2.pnorua7YP9WvxenjbkowZDUljzOAqDU47-Rw13MSBOE.wxUf5sZ7bijylzIQF9YGSVow9M6q_uDFBWm6l_pN3xw.1770995411.a9bd04043edcb03fa7728a839a3b8cad
+#EXTINF:-1, НТВ
+https://edge02r.mediavitrina.ru/hls-livef1/1tv/tracks-v4a1/mono.m3u8?token=v2.kuclAcfjYw6pN54bw4CiHTaJkmyS4vHgnqCkrOLHgeQ.9L8Tk70ROHUGKYZZLi6778LFg87tWE5tCKrNmQwsmZA.1770995455.cbed936847cc58cde42cc366d97e250c
+#EXTINF:-1, РЕН ТВ
+https://edge01r.mediavitrina.ru/hls-livef1/ntv0h/tracks-v4a1/mono.m3u8?token=v2.-tlEDbXNlG5mk4ndiuJyMa2NM7JR-s9xgnUc2ZxY_Us.ezqysmcGnS_4Dqerb3NdXfu0gguvp5gSG6xFy7XLzHk.1770995497.9c5d4dc94eb997d530050d898ab982f9
+#EXTINF:-1, ЕВРОСПОРТ 1
+https://edge01r.mediavitrina.ru/hls-livef1/ren-tv/tracks-v4a1/mono.m3u8?token=v2.1NmkCCxdG8caONgfDcWu807mjGKbQlO8aqDa6_xGtTs.3AQH_NOh8ZzUfHLt4AWdQAOhlbcLsT45blehhABEUnU.1770995536.c44754396e9f8f2537a3596e841f85f5
 #EXTINF:-1, ТНТ
-https://vgtrksmotrim.cdnvideo.ru/hls/planeta_rtr_euro/playlist_4.m3u8?md5=wGY8Xd7TvgrsXporYZptBw&e=1770405788&hls_proxy_host=70b013ca21e8364cd537747cf862272b|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Муз ТВ
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Дом Кино
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Кино ТВ
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Комедия
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Че
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Ю
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Soloviev Live
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Евроспорт 2
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Sport TV (Uz)
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, QazSport
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Euronews
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Viasat History
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Viasat Nature
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Discovery Channel
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, National Geographic
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Disney
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Nickelodeon
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
-#EXTINF:-1, Cartoon Network
-https://player.smotrim.ru/iframe/stream/live_id/d7fef212-df66-485d-9952-7eab82d7d51b/index.m3u8|Referer=https://smotrettv.comMozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36
+https://edge01r.mediavitrina.ru/hls-livef8/tnt/tracks-v4a1/mono.m3u8?token=v2.cfN2rFKJvWdiIrQDZQdMMgHGZudu9kkEys38PQ4crAs.hz-d0L853Ye_VBY6B5yJORunra-0snKGzEeG5VDrhao.1770995646.5b8083ec5417c629f37b8a42877a2af9
+#EXTINF:-1, ТВ ЦЕНТР
+https://edge01r.mediavitrina.ru/hls-livef8/tnt/tracks-v4a1/mono.m3u8?token=v2.cfN2rFKJvWdiIrQDZQdMMgHGZudu9kkEys38PQ4crAs.hz-d0L853Ye_VBY6B5yJORunra-0snKGzEeG5VDrhao.1770995646.5b8083ec5417c629f37b8a42877a2af9
+#EXTINF:-1, EURONEWS
+https://edge02r.mediavitrina.ru/hls-livef1/tvc/tracks-v4a1/mono.m3u8?token=v2.iELPRYZSBlBaQkZvQ4aM0bDXs-511JaCmD9EKerUQqI.lF2FnTcshy7OcSNdqEsw53s3wdIGdppSDePXpgatxR0.1770995685.6946361e1e6a294fd608d48d1942af9b
+#EXTINF:-1, ЗВЕЗДА
+https://server.musical.uz/tv/euronews/index.m3u8?token=502d39e70d1613d49697d5c3e5eaa4077f075df2-d5a7fb19d3de1e9bbc010090875a49df-1770401422-1770390622&remote=57.151.137.129
+#EXTINF:-1, COMEDY CENTRAL
+https://edge01r.mediavitrina.ru/hls-livef8/zvezda0/tracks-v4a1/mono.m3u8?token=v2.diDa2Bzn9T1-U5b2FtbjENzxAwOKS7foFKdcc--g_-Y.9lD705uJZUs5SLmXGvcITW242ZHEbxBd-vNaQAOjplQ.1770995789.992efcbf54bf8da446cec6254d61f86a
+#EXTINF:-1, ЕВРОСПОРТ 2
+https://server.musical.uz/tv/paramount_web/index.m3u8?token=e1eda4c72deca35854e3631de454cdd3af7dadb3-d648bc9d410dbe7791635cd59bed4715-1770401526-1770390726&remote=57.151.137.129
+#EXTINF:-1, ДОМАШНИЙ
+https://server.musical.uz/tv/eurosport2_web/index.m3u8?token=e13765adfb218cd7c4d074e01b48c678d9a1c6e5-963dbf2f75c0c7bca0e9e1a6238a14a4-1770401563-1770390763&remote=57.151.137.129
+#EXTINF:-1, СОЛОВЬЕВ LIVE
+https://edge01r.mediavitrina.ru/hls-livef1/ctc-dom/tracks-v4a1/mono.m3u8?token=v2.bJFzuXJZbVL3nx-DXKEQR_51WKcmPA6CEKp1AZeH1xY.g0PT4j8OhE6-4glXvV4FOGnvMxuqpq_MJVrwbPHh0ho.1770995902.60cdeb2057ae470af681b530368fc043
+#EXTINF:-1, ПЯТНИЦА
+https://server.musical.uz/tv/solovev-live/index.m3u8?token=bd72a156e987f77a1b14c9f4e19985b388564630-6e4c38ff5bfc6516f69edbec2f6fbc45-1770401640-1770390840&remote=57.151.137.129
+#EXTINF:-1, МОСКВА ДОВЕРИЕ
+https://edge02d.mediavitrina.ru/hls-livef8/friday/tracks-v4a1/mono.m3u8?token=v2.-iJNAlwsS4fS0N49d-NgiWSfkjRQHTEP77MzSsleUs4.hr88ok9SFBSBGuY2tXSnyYKzmXK-j33OKZ1K38Y01Hg.1770995979.f383865a5e84e2883fb1e0ec965dc2d4
+#EXTINF:-1, СТС
+https://server.musical.uz/tv/moskva-doveria/index.m3u8?token=93c40940ec77b03de24f441cb61ba6a3a225eb74-78787643b32e432950f3d53de138a917-1770401736-1770390936&remote=57.151.137.129
+#EXTINF:-1, QAZSPORT
+https://server.musical.uz/qazsport/tracks-v1a1/mono.m3u8?remote=57.151.137.129&token=ae7ace85a30a95bfb076548d1ccdf921a88ad489-a2dbae32d988366daf4fd88c65f4ca29-1770401834-1770391034
