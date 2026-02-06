@@ -12,15 +12,21 @@ async def get_all_channels_from_site(page):
         await asyncio.sleep(5)
         found_channels = {}
         links = await page.query_selector_all("a")
+        
+        # Список стоп-слов для фильтрации категорий
+        stop_names = ["ОБЩЕСТВЕННЫЕ", "НОВОСТНЫЕ", "СПОРТИВНЫЕ", "РАЗВЛЕКАТЕЛЬНЫЕ", "ДЕТСКИЕ", "ФИЛЬМЫ", "ПОЗНАВАТЕЛЬНЫЕ"]
+
         for link in links:
             try:
                 url = await link.get_attribute("href")
                 name = await link.inner_text()
                 if url and name:
                     clean_name = name.split('\n')[0].strip().upper()
-                    if len(clean_name) < 2: continue
-                    if any(cat in url for cat in ['/public/', '/news/', '/sport/', '/entertainment/']):
+                    if len(clean_name) < 3 or clean_name in stop_names: continue
+                    
+                    if any(cat in url for cat in ['/public/', '/news/', '/sport/', '/entertainment/', '/kids/', '/movies/']):
                         full_url = url if url.startswith("http") else f"https://smotrettv.com{url}"
+                        # Сохраняем только уникальные имена
                         if clean_name not in found_channels:
                             found_channels[clean_name] = full_url
                             print(f"    [+] {clean_name}", flush=True)
@@ -32,63 +38,47 @@ async def get_all_channels_from_site(page):
 
 async def get_tokens_and_make_playlist():
     async with async_playwright() as p:
-        print(">>> [2/3] Запуск Chromium Stealth...", flush=True)
+        print(">>> [2/3] Запуск браузера...", flush=True)
         browser = await p.chromium.launch(headless=True)
-        # Важно: эмулируем реальное устройство
-        context = await browser.new_context(
-            user_agent=USER_AGENT,
-            viewport={'width': 1280, 'height': 720}
-        )
+        context = await browser.new_context(user_agent=USER_AGENT, viewport={'width': 1280, 'height': 720})
         page = await context.new_page()
 
         CHANNELS = await get_all_channels_from_site(page)
         if not CHANNELS: return
 
-        print(f"\n>>> [3/3] Граббинг токенов (max 20)...", flush=True)
-        results = []
+        print(f"\n>>> [3/3] Граббинг токенов для {len(CHANNELS)} каналов...", flush=True)
+        results = {} # Используем словарь для исключения дублей ссылок
         
-        for name, url in list(CHANNELS.items())[:20]:
+        for name, url in CHANNELS.items():
             stream_url = None
-            
-            # Ловим все m3u8, включая те, что внутри iframe
             async def handle_request(request):
                 nonlocal stream_url
                 u = request.url
-                if ".m3u8" in u and not any(x in u for x in ["yandex", "ads", "log"]):
-                    # Mediavitrina или прямые токены
-                    if "token=" in u or "master" in u or "index" in u:
+                if ".m3u8" in u and not any(x in u for x in ["yandex", "ads", "log", "metrics"]):
+                    if any(key in u for key in ["token=", "mediavitrina", "master", "index", "m3u8"]):
                         stream_url = u
 
             page.on("request", handle_request)
-            print(f"[*] {name:.<20}", end=" ", flush=True)
+            print(f"[*] {name:.<22}", end=" ", flush=True)
 
             try:
-                await page.goto(url, wait_until="load", timeout=30000)
-                await asyncio.sleep(5)
+                # Переход с лимитом времени, чтобы не зависать на одном канале
+                await page.goto(url, wait_until="domcontentloaded", timeout=25000)
+                await asyncio.sleep(6)
                 
-                # Ищем кнопку Play или видео во всех фреймах
-                found_play = False
-                for frame in page.frames:
-                    try:
-                        play_btn = await frame.query_selector("video, .vjs-play-control, .play")
-                        if play_btn:
-                            await play_btn.click()
-                            found_play = True
-                    except: continue
+                # Клик по видео
+                await page.mouse.click(640, 360)
+                await page.keyboard.press("Space")
                 
-                if not found_play:
-                    await page.mouse.click(640, 360) # Клик вслепую
-                
-                # Ждем появления токена до 12 сек
-                for _ in range(12):
+                for _ in range(10):
                     if stream_url: break
                     await asyncio.sleep(1)
 
-                if stream_url:
-                    results.append((name, stream_url))
+                if stream_url and stream_url not in results.values():
+                    results[name] = stream_url
                     print("OK", flush=True)
                 else:
-                    print("FAIL", flush=True)
+                    print("FAIL/SKIP", flush=True)
             except:
                 print("TIME", flush=True)
             
@@ -97,10 +87,10 @@ async def get_tokens_and_make_playlist():
         if results:
             with open("playlist.m3u", "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n")
-                f.write(f"# UPDATED: {datetime.datetime.now()}\n")
-                for n, l in results:
+                f.write(f"# UPDATED: {datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')}\n\n")
+                for n, l in results.items():
                     f.write(f"#EXTINF:-1, {n}\n{l}\n")
-            print(f"\n>>> ГОТОВО! Сохранено: {len(results)}", flush=True)
+            print(f"\n>>> ГОТОВО! Сохранено уникальных каналов: {len(results)}", flush=True)
 
         await browser.close()
 
