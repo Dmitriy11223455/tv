@@ -8,7 +8,7 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 async def get_all_channels_from_site(page):
     print(">>> [1/3] Поиск списка каналов...", flush=True)
     try:
-        await page.goto("https://smotrettv.com", wait_until="domcontentloaded", timeout=60000)
+        await page.goto("https://smotrettv.com", wait_until="networkidle", timeout=60000)
         await asyncio.sleep(5)
         found_channels = {}
         links = await page.query_selector_all("a[href*='/']")
@@ -31,9 +31,12 @@ async def get_all_channels_from_site(page):
 async def get_tokens_and_make_playlist():
     async with async_playwright() as p:
         print(">>> [2/3] Запуск браузера...", flush=True)
-        browser = await p.chromium.launch(headless=True)
+        # Запуск с отключением флага автоматизации
+        browser = await p.chromium.launch(headless=True, args=[
+            '--disable-blink-features=AutomationControlled',
+            '--no-sandbox'
+        ])
         
-        # Получаем список каналов в одной сессии
         init_context = await browser.new_context(user_agent=USER_AGENT)
         temp_page = await init_context.new_page()
         CHANNELS = await get_all_channels_from_site(temp_page)
@@ -43,38 +46,42 @@ async def get_tokens_and_make_playlist():
             print("Каналы не найдены")
             return await browser.close()
 
-        print(f"\n>>> [3/3] Сбор ссылок (полная изоляция)...", flush=True)
+        print(f"\n>>> [3/3] Сбор ссылок (изоляция + имитация клика)...", flush=True)
         results = []
         
-        for name, url in list(CHANNELS.items())[:20]:
-            # СОЗДАЕМ АБСОЛЮТНО НОВУЮ СЕССИЮ (с чистыми куками) для каждого канала
-            # Это исключает ситуацию "Первый вместо НТВ"
-            context = await browser.new_context(
-                user_agent=USER_AGENT,
-                viewport={'width': 1280, 'height': 720}
-            )
+        for name, url in list(CHANNELS.items())[:15]:
+            # Создаем новый контекст для каждого канала, чтобы не было дублей
+            context = await browser.new_context(user_agent=USER_AGENT)
+            # Скрываем автоматизацию через JS скрипт прямо в странице
             page = await context.new_page()
+            await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
             
-            # Локальный словарь для ссылки
             stream_data = {"url": None}
 
             async def handle_request(request):
                 u = request.url
-                if ".m3u8" in u and not any(x in u for x in ["ads", "log", "stat", "yandex"]):
-                    if "token=" in u or "master" in u or "index" in u:
+                if ".m3u8" in u and not any(x in u for x in ["ads", "log", "stat", "yandex", "doubleclick"]):
+                    if any(key in u for key in ["token=", "master", "index", "chunklist"]):
                         stream_data["url"] = u
 
             page.on("request", handle_request)
             print(f"[*] {name:.<25}", end=" ", flush=True)
 
             try:
+                # Переход с эмуляцией реферера
                 await page.goto(url, wait_until="domcontentloaded", timeout=40000)
-                await asyncio.sleep(10) # Ждем прогрузки плеера
+                await asyncio.sleep(8) 
                 
-                # Клик по видео
-                await page.mouse.click(640, 360) 
-                
-                # Ожидание m3u8
+                # Поиск видео и реальный клик (симуляция человека)
+                video_box = await page.query_selector("video, .player-container, #player")
+                if video_box:
+                    box = await video_box.bounding_box()
+                    if box:
+                        await page.mouse.click(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
+                else:
+                    await page.mouse.click(640, 360) 
+
+                # Ожидание ссылки до 15 секунд
                 for _ in range(15):
                     if stream_data["url"]: break
                     await asyncio.sleep(1)
@@ -87,7 +94,6 @@ async def get_tokens_and_make_playlist():
             except:
                 print("ERROR", flush=True)
             finally:
-                # Закрываем контекст целиком (удаляет все куки и кэш этого канала)
                 await context.close()
 
         if results:
@@ -95,7 +101,7 @@ async def get_tokens_and_make_playlist():
                 f.write("#EXTM3U\n")
                 for n, l in results:
                     f.write(f"#EXTINF:-1, {n}\n{l}\n")
-            print(f"\n>>> ГОТОВО! Ссылок сохранено: {len(results)}")
+            print(f"\n>>> ГОТОВО! Сохранено {len(results)} каналов.")
 
         await browser.close()
 
