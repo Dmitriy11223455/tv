@@ -4,98 +4,100 @@ from playwright.async_api import async_playwright
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
 
 async def get_all_channels_from_site(page):
-    print(">>> Сбор уникального списка каналов...")
+    print(">>> Загрузка главной страницы...")
     try:
-        # Ждем загрузки сети, чтобы JS успел отрисовать элементы
-        await page.goto("https://smotrettv.com", wait_until="networkidle", timeout=60000)
+        # Используем wait_until="domcontentloaded" для скорости
+        await page.goto("https://smotrettv.com", wait_until="domcontentloaded", timeout=60000)
         await asyncio.sleep(5)
         
         found_channels = {}
         links = await page.query_selector_all("a")
+        print(f">>> Всего ссылок на странице: {len(links)}")
         
         for link in links:
             try:
                 url = await link.get_attribute("href")
-                name = await link.inner_text()
+                raw_name = await link.inner_text()
                 
-                if url and name and len(name.strip()) > 1:
+                if url and raw_name:
+                    # ИСПРАВЛЕННАЯ ОЧИСТКА ИМЕНИ
+                    name_lines = raw_name.split('\n')
+                    clean_name = name_lines[0].strip().upper()
+                    
+                    if not clean_name: continue
+
                     categories = ['/public/', '/entertainment/', '/news/', '/kids/', '/movies/', '/sport/']
                     if any(cat in url for cat in categories):
-                        # ИСПРАВЛЕНО: Сначала очищаем текст, потом приводим к регистру
-                        clean_name = name.strip().split('\n')[0].strip().upper()
-                        
-                        if len(clean_name) > 2 and clean_name not in found_channels:
+                        if clean_name not in found_channels:
                             full_url = url if url.startswith("http") else f"https://smotrettv.com{url}"
                             found_channels[clean_name] = full_url
-            except:
+                            # Печатаем каждый найденный канал для отладки
+                            print(f"    Нашел канал: {clean_name}")
+            except Exception as e:
                 continue
             
         return found_channels
     except Exception as e:
-        print(f"[!] Ошибка при сборе каналов: {e}")
+        print(f"[!] Ошибка при загрузке сайта: {e}")
         return {}
 
 async def get_tokens_and_make_playlist():
     async with async_playwright() as p:
-        print(">>> Запуск браузера...")
-        # ИСПРАВЛЕНО: headless=True обязателен для GitHub Actions
+        print(">>> Запуск Chrome...")
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(user_agent=USER_AGENT)
         page = await context.new_page()
         
-        # Блокируем картинки для экономии трафика и скорости
-        await page.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2}", lambda route: route.abort())
-
         CHANNELS = await get_all_channels_from_site(page)
         
         if not CHANNELS:
-            print("[!] Список каналов пуст. Возможно, сайт заблокировал доступ или изменил структуру.")
+            print("[!] Каналы не найдены. Проверь селекторы или доступ к сайту.")
             await browser.close()
             return
 
-        print(f"[OK] Найдено уникальных каналов: {len(CHANNELS)}")
+        print(f"\n>>> Итого найдено: {len(CHANNELS)}. Начинаю сбор токенов...")
         
         playlist_results = []
-        for name, url in CHANNELS.items():
-            print(f"[*] Граббинг: {name}")
+        # Тестируем первые 15 каналов
+        for name, url in list(CHANNELS.items())[:15]:
             stream_url = None
 
             async def catch_m3u8(request):
                 nonlocal stream_url
-                r_url = request.url
-                if ".m3u8" in r_url and "yandex" not in r_url and "google" not in r_url:
-                    if any(x in r_url for x in ["token=", "mediavitrina", ".m3u8"]):
-                        stream_url = r_url
+                if ".m3u8" in request.url and not any(x in request.url for x in ["yandex", "ads"]):
+                    stream_url = request.url
 
             page.on("request", catch_m3u8)
-            
+            print(f"[*] Обработка: {name}...", end=" ", flush=True)
+
             try:
-                await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                await asyncio.sleep(6) # Даем время плееру
+                await page.goto(url, wait_until="domcontentloaded", timeout=20000)
+                await asyncio.sleep(5)
+                # Клик в центр экрана
+                await page.mouse.click(400, 300)
                 
-                # Имитируем клик для запуска плеера
-                await page.mouse.click(300, 300)
-                
-                for _ in range(10):
+                for _ in range(7):
                     if stream_url: break
                     await asyncio.sleep(1)
                 
                 if stream_url:
                     playlist_results.append((name, stream_url))
-                    print(f"   + Поток пойман")
+                    print("OK")
                 else:
-                    print(f"   - Не найден")
+                    print("FAIL (нет ссылки)")
             except:
-                print(f"   ! Ошибка загрузки")
+                print("ERROR (таймаут)")
             
             page.remove_listener("request", catch_m3u8)
 
         if playlist_results:
             with open("playlist.m3u", "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n")
+                import datetime
+                f.write(f"# Updated: {datetime.datetime.now()}\n")
                 for n, l in playlist_results:
                     f.write(f"#EXTINF:-1, {n}\n{l}\n")
-            print(f"\n>>> ГОТОВО! Сохранено {len(playlist_results)} каналов.")
+            print(f"\n>>> Плейлист готов! Сохранено каналов: {len(playlist_results)}")
 
         await browser.close()
 
