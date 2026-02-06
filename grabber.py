@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 from playwright.async_api import async_playwright
-# Исправленный импорт
+# Правильный импорт функции
 from playwright_stealth import stealth
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
@@ -34,25 +34,29 @@ async def get_tokens_and_make_playlist():
         print(">>> [2/3] Запуск браузера...", flush=True)
         browser = await p.chromium.launch(headless=True)
         
-        # Сначала собираем список ссылок
+        # Основной контекст для сбора списка
         context = await browser.new_context(user_agent=USER_AGENT)
         temp_page = await context.new_page()
-        await stealth(temp_page) # Исправлено
+        # ИСПОЛЬЗУЕМ ФУНКЦИЮ ПРАВИЛЬНО
+        await stealth(temp_page) 
+        
         CHANNELS = await get_all_channels_from_site(temp_page)
         await temp_page.close()
+        await context.close()
 
-        if not CHANNELS: return await browser.close()
+        if not CHANNELS: 
+            print("Каналы не найдены")
+            return await browser.close()
 
-        print(f"\n>>> [3/3] Граббинг (max 20)...", flush=True)
+        print(f"\n>>> [3/3] Сбор ссылок (изолированно)...", flush=True)
         results = []
         
         for name, url in list(CHANNELS.items())[:20]:
-            # Создаем отдельный контекст для КАЖДОГО канала (полная изоляция от дублей)
+            # НОВАЯ СЕССИЯ ДЛЯ КАЖДОГО КАНАЛА (решает проблему дублей видео)
             ch_context = await browser.new_context(user_agent=USER_AGENT)
             page = await ch_context.new_page()
             await stealth(page)
             
-            # Контейнер для ссылки
             stream_data = {"url": None}
 
             async def handle_request(request):
@@ -66,10 +70,11 @@ async def get_tokens_and_make_playlist():
 
             try:
                 await page.goto(url, wait_until="domcontentloaded", timeout=40000)
-                await asyncio.sleep(8)
+                await asyncio.sleep(10)
+                # Клик для запуска, если поток не пошел сам
                 await page.mouse.click(640, 360) 
                 
-                for _ in range(12):
+                for _ in range(15):
                     if stream_data["url"]: break
                     await asyncio.sleep(1)
 
@@ -81,14 +86,14 @@ async def get_tokens_and_make_playlist():
             except:
                 print("ERROR", flush=True)
             finally:
-                await ch_context.close() # Закрываем весь контекст со всеми куками
+                await ch_context.close()
 
         if results:
             with open("playlist.m3u", "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n")
                 for n, l in results:
                     f.write(f"#EXTINF:-1, {n}\n{l}\n")
-            print(f"\n>>> ГОТОВО! Сохранено: {len(results)}")
+            print(f"\n>>> ГОТОВО! Ссылок: {len(results)}")
 
         await browser.close()
 
