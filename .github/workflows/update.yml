@@ -1,7 +1,7 @@
 name: Update Playlist Tokens
 on:
   schedule:
-    - cron: '0 */6 * * *' # Запуск каждые 6 часов
+    - cron: '53 3 */3 * *' # Запуск в 03:53 каждые 3 дня
   workflow_dispatch: # Позволяет запустить вручную кнопкой
 
 jobs:
