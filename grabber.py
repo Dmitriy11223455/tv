@@ -37,7 +37,7 @@ async def get_all_channels_from_site(page):
 async def get_tokens_and_make_playlist():
     async with async_playwright() as p:
         print(">>> [2/3] Инициализация браузера...", flush=True)
-        browser = await p.chromium.launch(headless=True, args=['--no-sandbox'])
+        browser = await p.chromium.launch(headless=False, args=['--no-sandbox'])
         
         # 1. Получаем список каналов
         init_ctx = await browser.new_context(user_agent=USER_AGENT)
