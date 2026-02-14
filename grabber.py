@@ -42,7 +42,9 @@ async def get_all_channels_from_site(page):
 async def get_tokens_and_make_playlist():
     # ТВОЙ СЛОВАРЬ (Приоритетные каналы)
     MY_CHANNELS = {
-        "РОССИЯ 1": "https://smotrettv.com/784-rossija-1.html"
+        "РОССИЯ 1": "https://smotrettv.com/784-rossija-1.html",
+        "НТВ": "https://smotrettv.com/6-ntv.html",
+        "Рен ТВ": "https://smotrettv.com/316-ren-tv.html"
     }
 
     async with async_playwright() as p:
