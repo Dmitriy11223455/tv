@@ -9,7 +9,7 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 async def scroll_page(page):
     """Прокрутка для подгрузки всех каналов на главной"""
-    print(">>> Прокрутка страницы для поиска всех каналов...", flush=True)
+    print(">>> Прокрутка страницы для поиска новых каналов...", flush=True)
     for _ in range(5):
         await page.mouse.wheel(0, 2000)
         await asyncio.sleep(2)
@@ -29,6 +29,7 @@ async def get_all_channels_from_site(page):
                 name = await link.inner_text()
                 if url and name:
                     clean_name = name.strip().split('\n')[0].upper()
+                    # Собираем основные ТВ-разделы
                     if len(clean_name) > 1 and any(x in url for x in ['/public/', '/news/', '/sport/', '/entertainment/']):
                         full_url = url if url.startswith("http") else f"https://smotrettv.com{url}"
                         if clean_name not in found_channels:
@@ -40,11 +41,12 @@ async def get_all_channels_from_site(page):
         return {}
 
 async def get_tokens_and_make_playlist():
-    # ТВОЙ СЛОВАРЬ (Приоритетные каналы)
+    # --- ТВОЙ ОБНОВЛЕННЫЙ СЛОВАРЬ (Новые ссылки) ---
     MY_CHANNELS = {
         "РОССИЯ 1": "https://smotrettv.com/784-rossija-1.html",
         "НТВ": "https://smotrettv.com/6-ntv.html",
-        "Рен ТВ": "https://smotrettv.com/316-ren-tv.html"
+        "РЕН ТВ": "https://smotrettv.com/316-ren-tv.html",
+        "ПЕРВЫЙ КАНАЛ": "https://smotrettv.com"
     }
 
     async with async_playwright() as p:
@@ -57,7 +59,7 @@ async def get_tokens_and_make_playlist():
         SCRAPED = await get_all_channels_from_site(temp_page)
         await temp_page.close()
 
-        # Объединяем словарь и найденное
+        # Объединяем твой словарь и найденные каналы
         for name, url in SCRAPED.items():
             if name not in MY_CHANNELS:
                 MY_CHANNELS[name] = url
@@ -65,7 +67,7 @@ async def get_tokens_and_make_playlist():
         print(f"\n>>> [3/3] Сбор ссылок (Всего в очереди: {len(MY_CHANNELS)})...", flush=True)
         results = []
         
-        # Лимит 60 каналов для стабильности GitHub Actions
+        # Лимит 60 каналов для стабильности
         for name, url in list(MY_CHANNELS.items())[:60]:
             ch_page = await context.new_page()
             captured_urls = []
@@ -80,20 +82,34 @@ async def get_tokens_and_make_playlist():
 
             try:
                 await ch_page.goto(url, wait_until="domcontentloaded", timeout=45000)
-                await asyncio.sleep(random.uniform(8, 12))
+                await asyncio.sleep(8)
                 
-                # Клик по плееру
-                await ch_page.mouse.click(640, 360)
+                # Скролл к плееру и клик (фикс для НТВ и Рен ТВ)
+                await ch_page.evaluate("window.scrollTo(0, 450)")
+                await asyncio.sleep(2)
 
-                # Ожидание появления ссылки (до 12 сек)
-                for _ in range(12):
+                selectors = ["video", ".vjs-big-play-button", "button[class*='play']", "#player", "canvas"]
+                success_click = False
+                for s in selectors:
+                    try:
+                        el = await ch_page.wait_for_selector(s, timeout=3000)
+                        if el:
+                            await el.click(force=True)
+                            success_click = True
+                            break
+                    except: continue
+                
+                if not success_click:
+                    await ch_page.mouse.click(640, 480)
+
+                # Ожидание ссылки (25 сек для пробития рекламы)
+                for _ in range(25):
                     if captured_urls: break
                     await asyncio.sleep(1)
 
                 if captured_urls:
-                    # Wi-Fi оптимизация (v4/mid)
                     wifi_v = [u for u in captured_urls if "v4" in u or "720" in u or "mid" in u]
-                    final_link = wifi_v[0] if wifi_v else max(captured_urls, key=len)
+                    final_link = wifi_v if wifi_v else max(captured_urls, key=len)
                     results.append((name, final_link))
                     print("OK", flush=True)
                 else:
@@ -114,13 +130,13 @@ async def get_tokens_and_make_playlist():
                     
                     for n, l in results:
                         f.write(f'#EXTINF:-1, {n}\n')
-                        # Заголовки для стабильности (Mediavitrina + Wi-Fi)
-                        if "mediavitrina" in l or "РОССИЯ 1" in n:
+                        # Заголовки для Mediavitrina (Россия 1, НТВ, Рен ТВ)
+                        if "mediavitrina" in l or any(x in n for x in ["РОССИЯ 1", "НТВ", "РЕН ТВ"]):
                             h = f"|Referer=https://player.mediavitrina.ru{USER_AGENT}"
                         else:
                             h = f"|Referer=https://smotrettv.com{USER_AGENT}"
                         f.write(f"{l}{h}\n\n")
-                print(f"\n>>> ГОТОВО! Создан {filename}. Каналов: {len(results)}")
+                print(f"\n>>> ГОТОВО! Плейлист создан. Каналов: {len(results)}")
             except Exception as e:
                 print(f"\n[!] Ошибка записи: {e}")
 
@@ -128,6 +144,7 @@ async def get_tokens_and_make_playlist():
 
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
+
 
 
 
