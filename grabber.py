@@ -89,7 +89,7 @@ async def get_tokens_and_make_playlist():
                     if captured_urls: break
                     await asyncio.sleep(1)
 
-if captured_urls:
+       if captured_urls:
                     # Оптимизация под Wi-Fi (ищем 720p/v4)
                     wifi_v = [u for u in captured_urls if "v4" in u or "720" in u or "mid" in u]
                     final_link = wifi_v[0] if wifi_v else max(captured_urls, key=len)
