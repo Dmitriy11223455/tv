@@ -43,9 +43,8 @@ async def get_all_channels_from_site(page):
 async def get_tokens_and_make_playlist():
     # --- ТВОР МОЙ СЛОВАРЬ (Гарантированные ссылки для сложных каналов) ---
     MY_CHANNELS = {
-        "РОССИЯ 1": "https://smotrettv.com",
-        "ПЕРВЫЙ КАНАЛ": "https://smotrettv.com",
-        "НТВ": "https://smotrettv.com"
+        "РОССИЯ 1": "https://smotrettv.com/784-rossija-1.html",
+        "НТВ": "https://smotrettv.com/6-ntv.html"
     }
 
     async with async_playwright() as p:
@@ -90,7 +89,6 @@ async def get_tokens_and_make_playlist():
                     if captured_urls: break
                     await asyncio.sleep(1)
 
-> Дима:
 if captured_urls:
                     # Оптимизация под Wi-Fi (ищем 720p/v4)
                     wifi_v = [u for u in captured_urls if "v4" in u or "720" in u or "mid" in u]
