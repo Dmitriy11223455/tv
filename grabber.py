@@ -4,7 +4,7 @@ import os
 import random
 from playwright.async_api import async_playwright
 
-# Актуальный User-Agent для ТВ-плееров
+# Актуальный User-Agent
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
 async def scroll_page(page):
@@ -29,7 +29,6 @@ async def get_all_channels_from_site(page):
                 name = await link.inner_text()
                 if url and name:
                     clean_name = name.strip().split('\n')[0].upper()
-                    # Собираем основные ТВ-разделы
                     if len(clean_name) > 1 and any(x in url for x in ['/public/', '/news/', '/sport/', '/entertainment/']):
                         full_url = url if url.startswith("http") else f"https://smotrettv.com{url}"
                         if clean_name not in found_channels:
@@ -41,7 +40,7 @@ async def get_all_channels_from_site(page):
         return {}
 
 async def get_tokens_and_make_playlist():
-    # --- ТВОР МОЙ СЛОВАРЬ (Гарантированные ссылки для сложных каналов) ---
+    # ТВОЙ СЛОВАРЬ (Приоритетные каналы)
     MY_CHANNELS = {
         "РОССИЯ 1": "https://smotrettv.com/784-rossija-1.html",
         "НТВ": "https://smotrettv.com/6-ntv.html"
@@ -57,7 +56,7 @@ async def get_tokens_and_make_playlist():
         SCRAPED = await get_all_channels_from_site(temp_page)
         await temp_page.close()
 
-        # Объединяем словарь и найденное (твои каналы в приоритете)
+        # Объединяем словарь и найденное
         for name, url in SCRAPED.items():
             if name not in MY_CHANNELS:
                 MY_CHANNELS[name] = url
@@ -65,14 +64,14 @@ async def get_tokens_and_make_playlist():
         print(f"\n>>> [3/3] Сбор ссылок (Всего в очереди: {len(MY_CHANNELS)})...", flush=True)
         results = []
         
-        # Лимит 60 каналов, чтобы не забанили IP
+        # Лимит 60 каналов для стабильности GitHub Actions
         for name, url in list(MY_CHANNELS.items())[:60]:
             ch_page = await context.new_page()
             captured_urls = []
 
             async def handle_request(request):
                 u = request.url
-                if ".m3u8" in u and not any(x in u for x in ["ads", "log", "stat", "yandex", "metrika"]):
+                if ".m3u8" in u and not any(x in u for x in ["ads", "log", "stat", "yandex", "metrika", "telemetry"]):
                     captured_urls.append(u)
 
             ch_page.on("request", handle_request)
@@ -85,44 +84,48 @@ async def get_tokens_and_make_playlist():
                 # Клик по плееру
                 await ch_page.mouse.click(640, 360)
 
+                # Ожидание появления ссылки (до 12 сек)
                 for _ in range(12):
                     if captured_urls: break
                     await asyncio.sleep(1)
 
-    if captured_urls:
-                    # Оптимизация под Wi-Fi (ищем 720p/v4)
+                if captured_urls:
+                    # Wi-Fi оптимизация (v4/mid)
                     wifi_v = [u for u in captured_urls if "v4" in u or "720" in u or "mid" in u]
                     final_link = wifi_v[0] if wifi_v else max(captured_urls, key=len)
                     results.append((name, final_link))
                     print("OK", flush=True)
                 else:
                     print("FAIL", flush=True)
-            except:
+
+            except Exception:
                 print("ERR", flush=True)
             finally:
                 await ch_page.close()
 
-        # Сохранение плейлиста с лечением буферизации
+        # Запись плейлиста
         if results:
             filename = "playlist.m3u"
-            with open(filename, "w", encoding="utf-8") as f:
-                f.write("#EXTM3U\n")
-                f.write(f"# Обновлено: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n")
-                
-                for n, l in results:
-                    f.write(f'#EXTINF:-1, {n}\n')
-                    # Фикс заголовков для России 1 (Mediavitrina)
-                    if "mediavitrina" in l or "РОССИЯ 1" in n:
-                        h = f"|Referer=https://player.mediavitrina.ru{USER_AGENT}"
-                    else:
-                        h = f"|Referer=https://smotrettv.com{USER_AGENT}"
-                    f.write(f"{l}{h}\n\n")
-            
-            print(f"\n>>> ГОТОВО! Файл {filename} создан. Всего каналов: {len(results)}")
+            try:
+                with open(filename, "w", encoding="utf-8") as f:
+                    f.write("#EXTM3U\n")
+                    f.write(f"# Обновлено: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n")
+                    
+                    for n, l in results:
+                        f.write(f'#EXTINF:-1, {n}\n')
+                        # Заголовки для стабильности (Mediavitrina + Wi-Fi)
+                        if "mediavitrina" in l or "РОССИЯ 1" in n:
+                            h = f"|Referer=https://player.mediavitrina.ru{USER_AGENT}"
+                        else:
+                            h = f"|Referer=https://smotrettv.com{USER_AGENT}"
+                        f.write(f"{l}{h}\n\n")
+                print(f"\n>>> ГОТОВО! Создан {filename}. Каналов: {len(results)}")
+            except Exception as e:
+                print(f"\n[!] Ошибка записи: {e}")
 
         await browser.close()
 
-if name == "main":
+if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
 
 
