@@ -29,7 +29,6 @@ async def get_all_channels_from_site(page):
                 name = await link.inner_text()
                 if url and name:
                     clean_name = name.strip().split('\n')[0].upper()
-                    # Собираем основные ТВ-разделы
                     if len(clean_name) > 1 and any(x in url for x in ['/public/', '/news/', '/sport/', '/entertainment/']):
                         full_url = url if url.startswith("http") else f"https://smotrettv.com{url}"
                         if clean_name not in found_channels:
@@ -41,7 +40,7 @@ async def get_all_channels_from_site(page):
         return {}
 
 async def get_tokens_and_make_playlist():
-    # --- ТВОЙ ОБНОВЛЕННЫЙ СЛОВАРЬ (Новые ссылки) ---
+    # --- ТВОЙ ОБНОВЛЕННЫЙ СЛОВАРЬ (Новые рабочие ссылки) ---
     MY_CHANNELS = {
         "РОССИЯ 1": "https://smotrettv.com/784-rossija-1.html",
         "НТВ": "https://smotrettv.com/6-ntv.html",
@@ -59,7 +58,7 @@ async def get_tokens_and_make_playlist():
         SCRAPED = await get_all_channels_from_site(temp_page)
         await temp_page.close()
 
-        # Объединяем твой словарь и найденные каналы
+        # Объединяем словарь и найденное
         for name, url in SCRAPED.items():
             if name not in MY_CHANNELS:
                 MY_CHANNELS[name] = url
@@ -67,7 +66,7 @@ async def get_tokens_and_make_playlist():
         print(f"\n>>> [3/3] Сбор ссылок (Всего в очереди: {len(MY_CHANNELS)})...", flush=True)
         results = []
         
-        # Лимит 60 каналов для стабильности
+        # Лимит 60 каналов для стабильности GitHub Actions
         for name, url in list(MY_CHANNELS.items())[:60]:
             ch_page = await context.new_page()
             captured_urls = []
@@ -84,7 +83,7 @@ async def get_tokens_and_make_playlist():
                 await ch_page.goto(url, wait_until="domcontentloaded", timeout=45000)
                 await asyncio.sleep(8)
                 
-                # Скролл к плееру и клик (фикс для НТВ и Рен ТВ)
+                # Скролл к плееру и клик
                 await ch_page.evaluate("window.scrollTo(0, 450)")
                 await asyncio.sleep(2)
 
@@ -102,14 +101,16 @@ async def get_tokens_and_make_playlist():
                 if not success_click:
                     await ch_page.mouse.click(640, 480)
 
-                # Ожидание ссылки (25 сек для пробития рекламы)
+                # Ожидание ссылки (25 сек)
                 for _ in range(25):
                     if captured_urls: break
                     await asyncio.sleep(1)
 
                 if captured_urls:
+                    # ИСПРАВЛЕНИЕ: Выбираем строку, а не список []
                     wifi_v = [u for u in captured_urls if "v4" in u or "720" in u or "mid" in u]
-                    final_link = wifi_v if wifi_v else max(captured_urls, key=len)
+                    final_link = wifi_v[0] if wifi_v else max(captured_urls, key=len)
+                    
                     results.append((name, final_link))
                     print("OK", flush=True)
                 else:
@@ -120,7 +121,7 @@ async def get_tokens_and_make_playlist():
             finally:
                 await ch_page.close()
 
-        # Запись плейлиста
+        # ЗАПИСЬ ПЛЕЙЛИСТА
         if results:
             filename = "playlist.m3u"
             try:
@@ -130,13 +131,14 @@ async def get_tokens_and_make_playlist():
                     
                     for n, l in results:
                         f.write(f'#EXTINF:-1, {n}\n')
-                        # Заголовки для Mediavitrina (Россия 1, НТВ, Рен ТВ)
+                        # ИСПРАВЛЕНИЕ: Формат заголовков (Referer + &User-Agent)
                         if "mediavitrina" in l or any(x in n for x in ["РОССИЯ 1", "НТВ", "РЕН ТВ"]):
                             h = f"|Referer=https://player.mediavitrina.ru{USER_AGENT}"
                         else:
                             h = f"|Referer=https://smotrettv.com{USER_AGENT}"
+                        
                         f.write(f"{l}{h}\n\n")
-                print(f"\n>>> ГОТОВО! Плейлист создан. Каналов: {len(results)}")
+                print(f"\n>>> ГОТОВО! Плейлист {filename} создан. Каналов: {len(results)}")
             except Exception as e:
                 print(f"\n[!] Ошибка записи: {e}")
 
@@ -144,6 +146,7 @@ async def get_tokens_and_make_playlist():
 
 if __name__ == "__main__":
     asyncio.run(get_tokens_and_make_playlist())
+
 
 
 
