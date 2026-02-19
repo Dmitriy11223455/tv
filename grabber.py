@@ -114,7 +114,7 @@ async def get_tokens_and_make_playlist():
                 for n, l in results:
                     f.write(f'#EXTINF:-1, {n}\n')
                     if "mediavitrina" in l or any(x in n for x in ["РОССИЯ 1", "НТВ", "РЕН ТВ"]):
-                        h = f"|Referer=https://player.mediavitrina.ru{USER_AGENT}"
+                        h = f"|Referer=https://player.mediavitrina.ru/{USER_AGENT}"
                     else:
                         h = f"|Referer=https://smotrettv.com/{USER_AGENT}"
                     f.write(f"{l}{h}\n\n")
