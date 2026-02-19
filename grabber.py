@@ -42,6 +42,9 @@ async def get_tokens_and_make_playlist():
         "НТВ": "https://smotrettv.com/6-ntv.html",
         "РЕН ТВ": "https://smotrettv.com/316-ren-tv.html",
         "ПЕРВЫЙ КАНАЛ": "https://smotrettv.com/tv/public/1003-pervyj-kanal.html",
+        "РОССИЯ 24": "https://smotrettv.com/tv/news/217-rossija-24.html",
+        "РТР ПЛАНЕТА": "https://smotrettv.com/tv/public/218-rtr-planeta.html",
+        "КАНАЛ Ю": "https://smotrettv.com/tv/entertainment/44-kanal-ju.html"
     }
 
     async with async_playwright() as p:
