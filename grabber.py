@@ -72,7 +72,7 @@ async def get_tokens_and_make_playlist():
         # Сортировка: Россия 1 и Первый в начало
         sorted_keys = sorted(CHANNELS.keys(), key=lambda x: ("РОССИЯ 1" not in x, "ПЕРВЫЙ" not in x, x))
         
-        for name in sorted_keys[:50]:
+        for name in sorted_keys[:150]:
             url = CHANNELS[name]
             ch_page = await context.new_page()
             captured_urls = []
