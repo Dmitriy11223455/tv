@@ -132,7 +132,7 @@ async def get_tokens_and_make_playlist():
                     f.write(f'#EXTINF:-1, {n}\n')
                     # Фикс заголовков для ТВ (Mediavitrina) и Радио
                     if "mediavitrina" in l or any(x in n for x in ["РОССИЯ 1", "НТВ", "РЕН ТВ"]):
-                        h = f"|Referer=https://player.mediavitrina.ru/{USER_AGENT}"
+                        h = f"|Referer=https://player.mediavitrina.ru{USER_AGENT}"
                     else:
                         h = f"|Referer=https://smotrettv.com/{USER_AGENT}"
                     f.write(f"{l}{h}\n\n")
