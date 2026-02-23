@@ -149,7 +149,7 @@ async def main():
                 for n, l in results:
                     f.write(f'#EXTINF:-1, {n}\n')
                     # Фикс заголовков: слэш после домена и & перед User-Agent
-                    if "mediavitrina" in l or any(x in n for x in ["РОССИЯ 1", "НТВ", "РЕН ТВ", "ПЕРВЫЙ"]):
+                    if "mediavitrina" in l or any(x in n for x in ["РОССИЯ 1", "НТВ", "РЕН ТВ", "ПЕРВЫЙ", "РОССИЯ 24"]):
                         h = f"|Referer=https://player.mediavitrina.ru/{USER_AGENT}"
                     else:
                         h = f"|Referer=https://smotrettv.com/{USER_AGENT}"
