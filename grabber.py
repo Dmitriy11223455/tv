@@ -62,13 +62,14 @@ async def main():
         SCRAPED = await get_all_channels_from_site(temp_page)
         await temp_page.close()
 
+        # Объединяем твой словарь и найденное
         for name, url in SCRAPED.items():
             if name not in MY_CHANNELS: MY_CHANNELS[name] = url
 
-        print(f"\n>>> [3/3] Сбор прямых ссылок (Лимит: 70)...", flush=True)
+        print(f"\n>>> [3/3] Сбор прямых ссылок (Лимит: 75)...", flush=True)
         results = []
         
-        for name, url in list(MY_CHANNELS.items())[:70]:
+        for name, url in list(MY_CHANNELS.items())[:75]:
             ch_page = await context.new_page()
             captured_urls = []
 
@@ -83,12 +84,11 @@ async def main():
 
             try:
                 await ch_page.goto(url, wait_until="domcontentloaded", timeout=60000)
-                await asyncio.sleep(10) 
+                await asyncio.sleep(12) 
                 
-                # КЛИК ПО ПЛЕЕРУ (ТВ + РАДИО)
+                # Клик для активации плеера
                 await ch_page.evaluate("window.scrollTo(0, 450)")
-                # Список кнопок запуска для разных типов плееров
-                play_selectors = ["video", "audio", ".vjs-big-play-button", "button[class*='play']", "div[id*='player']", "span[class*='play']"]
+                play_selectors = ["video", "audio", ".vjs-big-play-button", "button[class*='play']", "div[id*='player']"]
                 for s in play_selectors:
                     try:
                         el = await ch_page.wait_for_selector(s, timeout=3000)
@@ -100,12 +100,23 @@ async def main():
 
                 await ch_page.mouse.click(640, 450)
                 
+                # Ждем появления ссылок
                 for _ in range(25):
                     if captured_urls: break
                     await asyncio.sleep(1)
 
-                if captured_urls:
-                    # Приоритет для радио на mp3/aac, для ТВ на master/index
+                # СПЕЦИАЛЬНАЯ ЛОГИКА ДЛЯ РОССИИ 1 (OK JS)
+                if "РОССИЯ 1" in name:
+                    js_src = await ch_page.evaluate("() => { let v = document.querySelector('video'); return v ? v.src : null; }")
+                    if js_src and "http" in js_src:
+                        results.append((name, js_src))
+                        print("OK (JS)", flush=True)
+                    else:
+                        print("FAIL (JS)", flush=True)
+                
+                # ОБЫЧНАЯ ЛОГИКА ДЛЯ ВСЕХ ОСТАЛЬНЫХ
+                elif captured_urls:
+                    # Приоритет радио на mp3, ТВ на master/index
                     audio_v = [u for u in captured_urls if any(x in u.lower() for x in [".mp3", ".aac"])]
                     masters = [u for u in captured_urls if any(x in u.lower() for x in ["master", "index"])]
                     
@@ -119,7 +130,7 @@ async def main():
                     results.append((name, str(final_link)))
                     print("OK", flush=True)
                 else:
-                    # Запасной JS метод
+                    # Запасной JS для всех, если m3u8 не поймался
                     src = await ch_page.evaluate("() => { let a = document.querySelector('audio'); let v = document.querySelector('video'); return a ? a.src : (v ? v.src : null); }")
                     if src and "http" in src:
                         results.append((name, src))
@@ -137,7 +148,7 @@ async def main():
                 f.write("#EXTM3U\n\n")
                 for n, l in results:
                     f.write(f'#EXTINF:-1, {n}\n')
-                    # ПРАВИЛЬНЫЙ ФОРМАТ: слэш после домена и & перед User-Agent
+                    # Фикс заголовков: слэш после домена и & перед User-Agent
                     if "mediavitrina" in l or any(x in n for x in ["РОССИЯ 1", "НТВ", "РЕН ТВ", "ПЕРВЫЙ"]):
                         h = f"|Referer=https://player.mediavitrina.ru/{USER_AGENT}"
                     else:
